@@ -3,7 +3,6 @@
   </a>
   <h1>BookmarksProtal</h1>
   <br>
-==============
 BookmarksPortal is a crx extension that accompanies the ChuwuBookmarks project, used to export browser bookmarks into appropriate json format files.  
 
 Supported ExtensionManifestV3.
