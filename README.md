@@ -1,4 +1,8 @@
-BookmarksPortal
+<div align="center">
+    <img src="![icon128](https://github.com/user-attachments/assets/e07e52a0-db55-4838-b917-b69185847d9d)" alt="BookmarksProtal Logo" width="20%" />
+  </a>
+  <h1>BookmarksProtal</h1>
+  <br>
 ==============
 BookmarksPortal is a crx extension that accompanies the ChuwuBookmarks project, used to export browser bookmarks into appropriate json format files.  
 
