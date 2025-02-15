@@ -13,6 +13,8 @@ BookmarksPortal是ChuwuBookmarks项目的配套浏览器拓展程序，用于导
 
 已支持ExtensionManifestV3规范.
 
+国内下载链接：https://pan.baidu.com/s/1Pt0DGpCi9Xu8KtlexGga1A?pwd=0214
+
 
 ![image](https://github.com/user-attachments/assets/62388e03-98c6-42a8-9c17-2ffb40e019f3)
 
