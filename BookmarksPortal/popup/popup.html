@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>书签传送门</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div class="header">
+        <h1>选择书签文件夹</h1>
+        <div class="button-group">
+            <button id="selectAllBtn" title="选中所有可见文件夹">全选</button>
+            <button id="deselectAllBtn" title="清除所有选择">反选</button>
+        </div>
+    </div>
+
+    <div id="loading" class="loading">加载数据中...</div>
+    <div id="error" class="error" hidden>无法加载书签数据！</div>
+
+    <div id="container" hidden>
+        <div class="bookmark-list-container">
+            <ul id="bookmarkList" class="bookmark-list"></ul>
+        </div>
+        <div class="export-section">
+            <button id="exportButton" class="export-button" disabled>
+                <span class="spinner" hidden></span>
+                <span class="button-text">导出选中书签</span>
+            </button>
+            <div class="export-status" id="exportStatus"></div>
+        </div>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>
