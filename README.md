@@ -1,7 +1,7 @@
 <div align="center">
     <img src="https://github.com/user-attachments/assets/e07e52a0-db55-4838-b917-b69185847d9d" alt="BookmarksProtal Logo" width="20%" />
   </a>
-  <h1>BookmarksProtal</h1>
+  <h1>BookmarksPortal</h1>
     <h2>Export Your Bookmarks to JSON File.</h2>  
   <br>
 BookmarksPortal is a powerful browser extension that accompanies the ChuwuBookmarks project.
