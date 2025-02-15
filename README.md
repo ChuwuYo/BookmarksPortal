@@ -9,7 +9,7 @@ BookmarksPortal is a powerful browser extension that accompanies the ChuwuBookma
 Supported ExtensionManifestV3.
 
 
-BookmarksPortal是ChuwuBookmarks项目的配套浏览器拓展程序，用于导出浏览器书签为合适的JSON格式文件。
+BookmarksPortal是 [ChuwuBookmarks项目](https://github.com/HatsuChuwu/ChuwuBookmarks) 的配套浏览器拓展程序，用于导出浏览器书签为合适的JSON格式文件。
 
 已支持ExtensionManifestV3规范.
 
