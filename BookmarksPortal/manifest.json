@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "书签导出工具",
+  "name": "书签传送门",
   "description": "导出选定文件夹中的Chrome书签为JSON格式",
   "version": "1.0",
   "permissions": [
