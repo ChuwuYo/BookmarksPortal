@@ -6,7 +6,6 @@
   <br>
 BookmarksPortal is a powerful browser extension that accompanies the ChuwuBookmarks Project. 
 
-
 Also applicable to the Pintree project.
 
 Supported ExtensionManifestV3.
