@@ -4,12 +4,12 @@
   <h1>BookmarksProtal</h1>
     <h2>Export Your Bookmarks to JSON File.</h2>  
   <br>
-BookmarksPortal is a crx/xpi extension that accompanies the ChuwuBookmarks project.
+BookmarksPortal is a powerful browser extension that accompanies the ChuwuBookmarks project.
 
 Supported ExtensionManifestV3.
 
 
-BookmarksPortal是ChuwuBookmarks项目的配套crx/xpi拓展程序，用于导出浏览器书签为合适的json格式文件。
+BookmarksPortal是ChuwuBookmarks项目的配套浏览器拓展程序，用于导出浏览器书签为合适的JSON格式文件。
 
 已支持ExtensionManifestV3规范.
 
