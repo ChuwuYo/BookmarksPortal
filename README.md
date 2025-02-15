@@ -4,7 +4,8 @@
   <h1>BookmarksPortal</h1>
     <h2>Export Your Bookmarks to JSON File.</h2>  
   <br>
-BookmarksPortal is a powerful browser extension that accompanies the ChuwuBookmarks. 
+BookmarksPortal is a powerful browser extension that accompanies the [ChuwuBookmarks Project](https://github.com/HatsuChuwu/ChuwuBookmarks) . 
+
 
 Also applicable to the Pintree project.
 
