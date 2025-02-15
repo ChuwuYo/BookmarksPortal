@@ -1,0 +1,148 @@
+/* 基础样式 */
+body {
+  font-family: "Segoe UI", system-ui, sans-serif;
+  min-width: 300px;
+  max-height: 600px;
+  margin: 0;
+  padding: 12px;
+  background: #f9f9fb;
+  color: #15141a;
+}
+
+/* 夜间模式适配 */
+@media (prefers-color-scheme: dark) {
+  body {
+      background: #1c1b22;
+      color: #fbfbfe;
+  }
+}
+
+/* 头部样式 */
+.header {
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(21, 20, 26, 0.1);
+  margin-bottom: 12px;
+}
+
+.header h1 {
+  font-size: 1.1em;
+  margin: 0 0 8px 0;
+}
+
+.button-group {
+  display: flex;
+  gap: 6px;
+}
+
+.button-group button {
+  flex: 1;
+  padding: 6px 12px;
+  background: #0061c3;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.button-group button:hover {
+  opacity: 0.9;
+}
+
+/* 加载状态提示 */
+.loading, .error {
+  padding: 16px;
+  text-align: center;
+  font-size: 0.9em;
+}
+
+.error {
+  color: #c50000;
+}
+
+/* 书签列表容器 */
+.bookmark-list-container {
+  max-height: 400px;
+  overflow-y: auto;
+  margin: 12px 0;
+  border: 1px solid rgba(21, 20, 26, 0.1);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.dark .bookmark-list-container {
+  background: rgba(28, 27, 34, 0.9);
+}
+
+/* 书签列表项 */
+.bookmark-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.bookmark-item {
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  transition: background 0.1s;
+}
+
+.bookmark-item:hover {
+  background: rgba(21, 20, 26, 0.05);
+}
+
+.dark .bookmark-item:hover {
+  background: rgba(251, 251, 254, 0.05);
+}
+
+/* 复选框 */
+.folder-checkbox {
+  margin: 0 8px 0 0;
+  cursor: pointer;
+}
+
+/* 导出按钮区域 */
+.export-section {
+  text-align: center;
+  padding-top: 8px;
+}
+
+.export-button {
+  padding: 10px 24px;
+  background: #058B00;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  position: relative;
+}
+
+.export-button:disabled {
+  background: #cccccc;
+  cursor: not-allowed;
+}
+
+/* 加载动画 */
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #ffffff;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* 状态提示 */
+.export-status {
+  font-size: 0.8em;
+  margin-top: 4px;
+  color: #666;
+  min-height: 18px;
+}
