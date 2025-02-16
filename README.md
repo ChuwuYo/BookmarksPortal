@@ -10,6 +10,7 @@ Also applicable to the Pintree project.
 
 Supported ExtensionManifestV3.
 
+Want to download? Click：https://github.com/HatsuChuwu/BookmarksPortal/releases/latest
 
 BookmarksPortal是 [ChuwuBookmarks项目](https://github.com/HatsuChuwu/ChuwuBookmarks) 的配套浏览器拓展程序，用于导出浏览器书签为合适的JSON格式文件。
 
