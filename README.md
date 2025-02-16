@@ -1,15 +1,14 @@
 <div align="center">
     <img src="https://github.com/user-attachments/assets/e07e52a0-db55-4838-b917-b69185847d9d" alt="BookmarksProtal Logo" width="20%" />
-  </a>
-  <h1>BookmarksPortal</h1>
-    <h2>Export Your Bookmarks to JSON File.</h2>  
-  <br>
+</div>
+<h1 align="center">BookmarksPortal</h1>
+<h2 align="center">Export Your Bookmarks to JSON File.</h2>  
+<br>
 BookmarksPortal is a powerful browser extension that accompanies the ChuwuBookmarks Project. 
 
 Also applicable to the Pintree project.
 
 Supported ExtensionManifestV3.
-
 
 BookmarksPortal是 [ChuwuBookmarks项目](https://github.com/HatsuChuwu/ChuwuBookmarks) 的配套浏览器拓展程序，用于导出浏览器书签为合适的JSON格式文件。
 
@@ -19,9 +18,7 @@ BookmarksPortal是 [ChuwuBookmarks项目](https://github.com/HatsuChuwu/ChuwuBoo
 
 国内下载链接：https://pan.baidu.com/s/1Pt0DGpCi9Xu8KtlexGga1A?pwd=0214
 
-
-![image](https://github.com/user-attachments/assets/76f11b49-661f-443f-891b-210163095ad4)
-
-![image](https://github.com/user-attachments/assets/8b7de29e-6e2d-4205-bf7a-331a9b9f8372)
-
-
+<div style="display: flex; justify-content: center;">
+    <img src="https://github.com/user-attachments/assets/76f11b49-661f-443f-891b-210163095ad4" alt="image" style="width: 45%; margin-right: 5%;">
+    <img src="https://github.com/user-attachments/assets/8b7de29e-6e2d-4205-bf7a-331a9b9f8372" alt="image" style="width: 45%; margin-left: 5%;">
+</div>
