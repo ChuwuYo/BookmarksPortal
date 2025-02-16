@@ -197,3 +197,30 @@ button.loading::after {
   outline: none;
   border-color: #1a73e8;
 }
+
+.language-switcher {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+}
+
+#languageToggle {
+  width: 32px;
+  height: 32px;
+  padding: 4px;
+  border-radius: 50%;
+  background-color: #fff;
+  border: 1px solid #dadce0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+#languageToggle:hover {
+  background-color: #f8f9fa;
+}
+
+#languageIcon {
+  font-size: 16px;
+}

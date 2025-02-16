@@ -1,8 +1,18 @@
 document.addEventListener('DOMContentLoaded', () => {
-  const bookmarkList = document.getElementById('bookmarkList');
+  const title = document.getElementById('title');
   const selectAllBtn = document.getElementById('selectAll');
   const deselectAllBtn = document.getElementById('deselectAll');
   const exportButton = document.getElementById('exportButton');
+  const languageToggle = document.getElementById('languageToggle');
+
+  // 初始化语言
+  applyLanguage();
+
+  // 语言切换按钮事件
+  languageToggle.addEventListener('click', () => {
+    currentLang = currentLang === 'zh' ? 'en' : 'zh';
+    applyLanguage();
+  });
 
   // 获取并展示完整书签树
   chrome.bookmarks.getTree(bookmarkTree => {
@@ -270,4 +280,33 @@ async function exportSelectedBookmarks() {
     console.error('Error exporting bookmarks:', error);
     alert('导出过程中发生错误，请查看控制台了解详情。');
   }
+}
+
+const translations = {
+  zh: {
+    title: "选择要导出的文件夹",
+    selectAll: "全选",
+    deselectAll: "取消全选",
+    exportButton: "导出书签"
+  },
+  en: {
+    title: "Select Folder to Export",
+    selectAll: "Select All",
+    deselectAll: "Deselect All",
+    exportButton: "Export Bookmarks"
+  }
+};
+
+let currentLang = navigator.language.startsWith('zh') ? 'zh' : 'en';
+
+function applyLanguage() {
+  const title = document.getElementById('title');
+  const selectAllBtn = document.getElementById('selectAll');
+  const deselectAllBtn = document.getElementById('deselectAll');
+  const exportButton = document.getElementById('exportButton');
+
+  title.textContent = translations[currentLang].title;
+  selectAllBtn.textContent = translations[currentLang].selectAll;
+  deselectAllBtn.textContent = translations[currentLang].deselectAll;
+  exportButton.textContent = translations[currentLang].exportButton;
 }
