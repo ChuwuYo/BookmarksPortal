@@ -284,16 +284,16 @@ async function exportSelectedBookmarks() {
 
 const translations = {
   zh: {
-    title: "选择要导出的文件夹",
-    selectAll: "全选",
+    title: "选择要导出的书签",
+    selectAll: "选中所有",
     deselectAll: "取消全选",
     exportButton: "导出书签"
   },
   en: {
-    title: "Select Folder to Export",
+    title: "Select Your Bookmarks",
     selectAll: "Select All",
     deselectAll: "Deselect All",
-    exportButton: "Export Bookmarks"
+    exportButton: "Transmit !!"
   }
 };
 
