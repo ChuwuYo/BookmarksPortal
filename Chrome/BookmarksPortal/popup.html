@@ -3,21 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <title>书签传送门-BookmarksPortal</title>
+  <!-- 添加 Roboto 字体 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="popup.css">
 </head>
 <body>
   <div class="container">
-    <div class="language-switcher">
-      <button id="languageToggle" title="Switch language">
-        <span id="languageIcon">🌐</span>
-      </button>
-    </div>
-    <h1 id="title">选择要导出的文件夹</h1>
+    <h1 id="title">选择要导出的书签</h1>
+    <button id="languageToggle" title="Switch language">
+      <span id="languageIcon">🌐</span>
+    </button>
     <div id="bookmarkList" class="bookmark-tree"></div>
     <div class="controls">
-      <button id="selectAll">全选</button>
-      <button id="deselectAll">取消全选</button>
-      <button id="exportButton" class="primary">导出书签</button>
+      <div class="button-group">
+        <button id="selectAll" class="secondary">选中所有</button>
+        <button id="deselectAll" class="secondary">取消全选</button>
+        <button id="exportButton" class="primary">导出书签</button>
+      </div>
     </div>
   </div>
   <script src="popup.js"></script>
