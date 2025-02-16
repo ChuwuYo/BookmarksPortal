@@ -1,5 +1,7 @@
 {
-    "name": "bookmarksportal",
-    "version": "1.0.0",
-    "description": "书签json导出工具"
-}
+    "scripts": {
+      "build:firefox": "web-ext build --source-dir dist --artifacts-dir web-ext-artifacts --overwrite-dest",
+      "build:firefox-prod": "web-ext build --source-dir dist --artifacts-dir web-ext-artifacts --overwrite-dest --filename bookmarks-portal-firefox.xpi"
+    }
+  }
+  
