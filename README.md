@@ -22,14 +22,4 @@ BookmarksPortal是 [ChuwuBookmarks项目](https://github.com/HatsuChuwu/ChuwuBoo
     <img id="second - img1" src="https://github.com/user-attachments/assets/76f11b49-661f-443f-891b-210163095ad4" alt="image">
     <img id="second - img2" src="https://github.com/user-attachments/assets/8b7de29e-6e2d-4205-bf7a-331a9b9f8372" alt="image">
 </div>
-<script>
-    window.onload = function () {
-        const firstImg = document.getElementById('first - img');
-        const secondImg1 = document.getElementById('second - img1');
-        const secondImg2 = document.getElementById('second - img2');
-        secondImg1.width = firstImg.width;
-        secondImg1.height = firstImg.height;
-        secondImg2.width = firstImg.width;
-        secondImg2.height = firstImg.height;
-    };
-</script>
+
