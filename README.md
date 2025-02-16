@@ -20,5 +20,8 @@ BookmarksPortal是 [ChuwuBookmarks项目](https://github.com/HatsuChuwu/ChuwuBoo
 国内下载链接：https://pan.baidu.com/s/1Pt0DGpCi9Xu8KtlexGga1A?pwd=0214
 
 
-![image](https://github.com/user-attachments/assets/62388e03-98c6-42a8-9c17-2ffb40e019f3)
+![image](https://github.com/user-attachments/assets/76f11b49-661f-443f-891b-210163095ad4)
+
+![image](https://github.com/user-attachments/assets/8b7de29e-6e2d-4205-bf7a-331a9b9f8372)
+
 
