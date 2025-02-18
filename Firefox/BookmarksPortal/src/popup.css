@@ -261,10 +261,35 @@ button.secondary {
   position: fixed;
   top: 24px;
   right: 24px;
+  overflow: visible; /* 允许动画溢出 */
+  transition: background 0.3s; /* 添加过渡效果 */
 }
 
+/* 定义一个CSS选择器，用于选择ID为languageToggle的元素在鼠标悬停时的样式 */
 #languageToggle:hover {
-  background: rgba(var(--md-sys-color-primary), 0.12);
+  background: rgba(var(--md-sys-color-primary), 0.8);
+}
+
+/* 修改波纹动画 */
+#languageToggle::after {
+  content: '';
+  position: absolute;
+  width: 150%;
+  height: 150%;
+  background: radial-gradient(circle, rgba(255,255,255,0.4) 10%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  border-radius: 50%;
+}
+
+#languageToggle:active::after {
+  opacity: 1;
+  transition-duration: 0.1s;
+}
+
+/* 禁用默认点击闪光效果 */
+#languageToggle {
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* 加载动画优化 */
