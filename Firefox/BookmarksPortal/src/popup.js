@@ -203,21 +203,28 @@ async function exportSelectedBookmarks() {
     alert(currentLang === 'zh' ? '请至少选择一个项目！' : 'Please select at least one item!');
     return;
   }
-
+  
+  // 显示加载状态
+  const exportButton = document.getElementById('exportButton');
+  const originalText = exportButton.textContent;
+  exportButton.disabled = true;
+  exportButton.textContent = currentLang === 'zh' ? '导出中...' : 'Exporting...';
+  
   try {
     const bookmarkTree = await browserAPI.bookmarks.getTree();
     const bookmarkBar = bookmarkTree[0].children[0];
-
+  
     const exportData = [{
       type: 'folder',
       addDate: Date.now(),
       title: currentLang === 'zh' ? '书签栏' : 'Bookmarks Bar',
       children: []
     }];
-
+  
     const selectedIds = new Set(Array.from(selectedCheckboxes).map(cb => cb.dataset.id));
-
-    async function processNode(node) {
+  
+    // 优化的递归处理函数
+    function processNode(node) {
       if (node.url) {
         let hostname = '';
         try {
@@ -230,19 +237,14 @@ async function exportSelectedBookmarks() {
           addDate: Number(node.dateAdded),
           title: node.title,
           url: node.url,
-          icon: hostname ? `https://logo.clearbit.com/${hostname}` : ''
+          icon: hostname ? `https://www.google.com/s2/favicons?domain=${hostname}` : ''
         };
       } else if (node.children) {
-        const processedChildren = [];
-        for (const child of node.children) {
-          if (selectedIds.has(child.id)) {
-            const processedChild = await processNode(child);
-            if (processedChild) {
-              processedChildren.push(processedChild);
-            }
-          }
-        }
-        
+        const processedChildren = node.children
+          .filter(child => selectedIds.has(child.id))
+          .map(child => processNode(child))
+          .filter(Boolean);
+  
         if (processedChildren.length > 0 || selectedIds.has(node.id)) {
           return {
             type: 'folder',
@@ -254,16 +256,13 @@ async function exportSelectedBookmarks() {
       }
       return null;
     }
-
-    for (const child of bookmarkBar.children) {
-      if (selectedIds.has(child.id)) {
-        const processedNode = await processNode(child);
-        if (processedNode) {
-          exportData[0].children.push(processedNode);
-        }
-      }
-    }
-
+  
+    // 批量处理书签栏的直接子节点
+    exportData[0].children = bookmarkBar.children
+      .filter(child => selectedIds.has(child.id))
+      .map(child => processNode(child))
+      .filter(Boolean);
+  
     const jsonStr = JSON.stringify(exportData, null, 2);
     const blob = new Blob([jsonStr], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -279,6 +278,10 @@ async function exportSelectedBookmarks() {
     alert(currentLang === 'zh' ? 
       '导出过程中发生错误，请查看控制台了解详情。' : 
       'Error occurred during export, please check console for details.');
+  } finally {
+    // 恢复按钮状态
+    exportButton.disabled = false;
+    exportButton.textContent = originalText;
   }
 }
 
