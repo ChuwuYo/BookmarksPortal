@@ -70,7 +70,7 @@ h1 {
   gap: 8px;
   padding: 10px 12px;
   border-radius: 12px; /* 增大圆角 */
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* 标准动画曲线 */
+  transition: all 0.3s var(--md-motion-standard-easing); /* 标准动画曲线 */
   background-color: #f3f3f3;
 }
 
@@ -203,7 +203,7 @@ button::after {
   top: 0;
   background: rgba(255,255,255,0.2);
   opacity: 0;
-  transition: opacity 0.3s;
+  transition: opacity 0.3s var(--md-motion-standard-easing);
 }
 
 /* 统一悬停效果 */
@@ -280,7 +280,7 @@ button.secondary {
   height: 150%;
   background: radial-gradient(circle, rgba(255,255,255,0.4) 10%, transparent 70%);
   opacity: 0;
-  transition: opacity 0.3s;
+  transition: opacity 0.3s var(--md-motion-standard-easing);
   border-radius: 50%;
 }
 
