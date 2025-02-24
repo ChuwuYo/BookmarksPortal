@@ -5,6 +5,7 @@
   --md-sys-color-surface-container: #ffffffdf;  /* 表面容器颜色 */
   --md-sys-color-outline: #79747E;      /* 轮廓颜色 */
   --md-sys-elevation-1: 0px 1px 3px 1px rgba(0, 0, 0, 0.15); /* 高程阴影 */
+  --md-motion-standard-easing: cubic-bezier(0.4, 0, 0.2, 1); /* 标准动画曲线 */
 }
 
 body {
@@ -15,6 +16,8 @@ body {
   font-family: 'Roboto', system-ui, sans-serif;
   background-color: var(--md-sys-color-surface-container);
   color: #1D1B20; /* 更新文字颜色 */
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .container {
@@ -68,7 +71,7 @@ h1 {
   gap: 8px;
   padding: 10px 12px;
   border-radius: 12px; /* 增大圆角 */
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* 标准动画曲线 */
+  transition: all 0.3s var(--md-motion-standard-easing); /* 标准动画曲线 */
   background-color: #f3f3f3;
 }
 
@@ -86,7 +89,7 @@ h1 {
   align-items: center;
   justify-content: center;
   color: var(--md-sys-color-outline);
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.3s var(--md-motion-standard-easing);
 }
 
 .toggle-btn.expanded {
@@ -183,7 +186,7 @@ h1 {
   cursor: pointer;
   font-size: 14px;
   font-weight: 500;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s var(--md-motion-standard-easing);
   position: relative;
   overflow: hidden;
   text-align: center;
@@ -201,7 +204,7 @@ button::after {
   top: 0;
   background: rgba(255,255,255,0.2);
   opacity: 0;
-  transition: opacity 0.3s;
+  transition: opacity 0.3s var(--md-motion-standard-easing);
 }
 
 /* 统一悬停效果 */
@@ -229,7 +232,7 @@ button.secondary {
   font-size: 14px;
   margin-bottom: 12px;
   background: #FFFFFF;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s var(--md-motion-standard-easing);
 }
 
 .search-input:focus {
@@ -278,7 +281,7 @@ button.secondary {
   height: 150%;
   background: radial-gradient(circle, rgba(255,255,255,0.4) 10%, transparent 70%);
   opacity: 0;
-  transition: opacity 0.3s;
+  transition: opacity 0.3s var(--md-motion-standard-easing);
   border-radius: 50%;
 }
 
