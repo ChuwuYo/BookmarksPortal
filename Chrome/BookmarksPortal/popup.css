@@ -5,6 +5,7 @@
   --md-sys-color-surface-container: #ffffffdf;  /* 表面容器颜色 */
   --md-sys-color-outline: #79747E;      /* 轮廓颜色 */
   --md-sys-elevation-1: 0px 1px 3px 1px rgba(0, 0, 0, 0.15); /* 高程阴影 */
+  --md-motion-standard-easing: cubic-bezier(0.4, 0, 0.2, 1); /* 标准动画曲线 */
 }
 
 body {
@@ -292,6 +293,7 @@ button.secondary {
 /* 禁用默认点击闪光效果 */
 #languageToggle {
   -webkit-tap-highlight-color: transparent;
+  transition: background 0.3s var(--md-motion-standard-easing);
 }
 
 /* 加载动画优化 */
