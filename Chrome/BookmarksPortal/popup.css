@@ -89,7 +89,7 @@ h1 {
   align-items: center;
   justify-content: center;
   color: var(--md-sys-color-outline);
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.3s var(--md-motion-standard-easing);
 }
 
 .toggle-btn.expanded {
@@ -111,7 +111,7 @@ h1 {
   background-color: #fff;
   cursor: pointer;
   position: relative;
-  transition: all 0.2s ease;
+  transition: all 0.3s var(--md-motion-standard-easing);
 }
 
 .node-checkbox:checked {
@@ -186,15 +186,14 @@ h1 {
   cursor: pointer;
   font-size: 14px;
   font-weight: 500;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s var(--md-motion-standard-easing);
   position: relative;
   overflow: hidden;
   text-align: center;
   flex: none;
 }
 
-
-/* 按钮波纹效果 */
+/* 按钮基础样式和效果 */
 button::after {
   content: '';
   position: absolute;
@@ -207,21 +206,13 @@ button::after {
   transition: opacity 0.3s var(--md-motion-standard-easing);
 }
 
-/* 统一悬停效果 */
-button:hover::after,
-button.secondary:hover::after {
+button:hover::after {
   opacity: 1;
 }
 
 button:focus {
   outline: none;
   box-shadow: 0 0 0 3px rgba(var(--md-sys-color-primary), 0.12);
-}
-
-button.secondary {
-  background: var(--md-sys-color-primary); /* 使用相同的背景色 */
-  color: var(--md-sys-color-on-primary);
-  border: none;
 }
 
 .search-input {
@@ -232,7 +223,7 @@ button.secondary {
   font-size: 14px;
   margin-bottom: 12px;
   background: #FFFFFF;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s var(--md-motion-standard-easing);
 }
 
 .search-input:focus {
@@ -241,12 +232,6 @@ button.secondary {
 }
 
 /* 语言切换按钮优化 */
-.language-switcher {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-}
-
 #languageToggle {
   width: 32px;
   height: 32px;
@@ -265,15 +250,14 @@ button.secondary {
   top: 24px;
   right: 24px;
   overflow: visible; /* 允许动画溢出 */
-  transition: background 0.3s; /* 添加过渡效果 */
+  transition: all 0.3s var(--md-motion-standard-easing);
+  -webkit-tap-highlight-color: transparent;
 }
 
-/* 定义一个CSS选择器，用于选择ID为languageToggle的元素在鼠标悬停时的样式 */
 #languageToggle:hover {
   background: rgba(var(--md-sys-color-primary), 0.8);
 }
 
-/* 修改波纹动画 */
 #languageToggle::after {
   content: '';
   position: absolute;
@@ -288,12 +272,6 @@ button.secondary {
 #languageToggle:active::after {
   opacity: 1;
   transition-duration: 0.1s;
-}
-
-/* 禁用默认点击闪光效果 */
-#languageToggle {
-  -webkit-tap-highlight-color: transparent;
-  transition: background 0.3s var(--md-motion-standard-easing);
 }
 
 /* 加载动画优化 */
