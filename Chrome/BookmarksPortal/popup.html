@@ -3,13 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#58505b">
   <title>书签传送门-BookmarksPortal</title>
-  <!-- 预加载 Roboto 字体以提高性能 -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <!-- DNS预解析和资源预加载 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://www.google.com" crossorigin>
+  <link rel="preload" href="popup.css" as="style">
+  <link rel="preload" href="popup.js" as="script">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="popup.css">
-</head>
 <body>
   <div class="container">
     <h1 id="title">选择要导出的书签</h1>
