@@ -1,15 +1,21 @@
+// 缓存DOM元素和状态
+const domCache = {};
+let bookmarksData = null;
+
 document.addEventListener('DOMContentLoaded', () => {
-  const title = document.getElementById('title');
-  const selectAllBtn = document.getElementById('selectAll');
-  const deselectAllBtn = document.getElementById('deselectAll');
-  const exportButton = document.getElementById('exportButton');
-  const languageToggle = document.getElementById('languageToggle');
+  // 缓存常用DOM元素
+  ['title', 'selectAll', 'deselectAll', 'exportButton', 'languageToggle', 'bookmarkList'].forEach(id => {
+    domCache[id] = document.getElementById(id);
+  });
 
   // 初始化语言
   applyLanguage();
 
+  // 使用事件委托处理按钮点击
+  document.querySelector('.button-group').addEventListener('click', handleButtonClick);
+  
   // 语言切换按钮事件
-  languageToggle.addEventListener('click', () => {
+  domCache.languageToggle.addEventListener('click', () => {
     currentLang = currentLang === 'zh' ? 'en' : 'zh';
     applyLanguage();
   });
@@ -17,16 +23,22 @@ document.addEventListener('DOMContentLoaded', () => {
   // 获取并展示完整书签树
   chrome.bookmarks.getTree(bookmarkTree => {
     const bookmarkBar = bookmarkTree[0].children[0];  // 书签栏节点
-    renderBookmarkTree(bookmarkBar.children);
+    bookmarksData = bookmarkBar.children; // 缓存书签数据
+    renderBookmarkTree(bookmarksData);
   });
-
-  // 全选/取消逻辑
-  selectAllBtn.addEventListener('click', () => toggleAllCheckboxes(true));
-  deselectAllBtn.addEventListener('click', () => toggleAllCheckboxes(false));
-
-  // 导出功能
-  exportButton.addEventListener('click', exportSelectedBookmarks);
 });
+
+// 使用事件委托处理按钮点击
+function handleButtonClick(event) {
+  const target = event.target;
+  if (target.id === 'selectAll') {
+    toggleAllCheckboxes(true);
+  } else if (target.id === 'deselectAll') {
+    toggleAllCheckboxes(false);
+  } else if (target.id === 'exportButton') {
+    exportSelectedBookmarks();
+  }
+}
 
 function renderBookmarkTree(nodes) {
   const container = document.getElementById('bookmarkList');
@@ -201,10 +213,11 @@ async function exportSelectedBookmarks() {
   }
   
   // 显示加载状态
-  const exportButton = document.getElementById('exportButton');
+  const exportButton = domCache.exportButton;
   const originalText = exportButton.textContent;
   exportButton.disabled = true;
   exportButton.textContent = currentLang === 'zh' ? '导出中...' : 'Exporting...';
+  exportButton.classList.add('loading');
   
   try {
     // 获取完整的书签树
@@ -303,13 +316,9 @@ const translations = {
 let currentLang = navigator.language.startsWith('zh') ? 'zh' : 'en';
 
 function applyLanguage() {
-  const title = document.getElementById('title');
-  const selectAllBtn = document.getElementById('selectAll');
-  const deselectAllBtn = document.getElementById('deselectAll');
-  const exportButton = document.getElementById('exportButton');
-
-  title.textContent = translations[currentLang].title;
-  selectAllBtn.textContent = translations[currentLang].selectAll;
-  deselectAllBtn.textContent = translations[currentLang].deselectAll;
-  exportButton.textContent = translations[currentLang].exportButton;
+  // 使用缓存的DOM元素，避免重复查询
+  domCache.title.textContent = translations[currentLang].title;
+  domCache.selectAll.textContent = translations[currentLang].selectAll;
+  domCache.deselectAll.textContent = translations[currentLang].deselectAll;
+  domCache.exportButton.textContent = translations[currentLang].exportButton;
 }

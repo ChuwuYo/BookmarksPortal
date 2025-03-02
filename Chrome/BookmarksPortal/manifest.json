@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "书签传送门-BookmarksPortal",
   "description": "导出选定的书签为规整的JSON格式文件（传送!!） - Export the selected bookmarks as a structured JSON file (Transmit!!)",
-  "version": "3.2.2",
+  "version": "3.3.0",
   "permissions": [
     "bookmarks"
   ],

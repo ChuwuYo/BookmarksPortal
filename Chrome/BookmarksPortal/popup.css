@@ -1,11 +1,21 @@
 /* Material You V3 主题优化 */
 :root {
   --md-sys-color-primary: #58505b;      /* 主色调更新 */
+  --md-sys-color-primary-rgb: 88, 80, 91; /* RGB格式的主色调，用于rgba */
   --md-sys-color-on-primary: #fafcda;
   --md-sys-color-surface-container: #ffffffdf;  /* 表面容器颜色 */
   --md-sys-color-outline: #79747E;      /* 轮廓颜色 */
+  --md-sys-color-outline-rgb: 121, 116, 126; /* RGB格式的轮廓颜色 */
   --md-sys-elevation-1: 0px 1px 3px 1px rgba(0, 0, 0, 0.15); /* 高程阴影 */
   --md-motion-standard-easing: cubic-bezier(0.4, 0, 0.2, 1); /* 标准动画曲线 */
+  
+  /* 常用颜色和值 */
+  --text-color: #1D1B20;
+  --border-radius-small: 4px;
+  --border-radius-medium: 12px;
+  --border-radius-large: 16px;
+  --border-radius-pill: 28px;
+  --transition-standard: all 0.3s var(--md-motion-standard-easing);
 }
 
 body {
@@ -70,13 +80,14 @@ h1 {
   align-items: center;
   gap: 8px;
   padding: 10px 12px;
-  border-radius: 12px; /* 增大圆角 */
-  transition: all 0.3s var(--md-motion-standard-easing); /* 标准动画曲线 */
+  border-radius: var(--border-radius-medium);
+  transition: var(--transition-standard);
   background-color: #f3f3f3;
+  will-change: transform, background-color;
 }
 
 .node-header:hover {
-  background: rgba(var(--md-sys-color-primary), 0.08);
+  background: rgba(var(--md-sys-color-primary-rgb), 0.08);
   transform: translateY(-1px);
 }
 
