@@ -1,3 +1,10 @@
+document.addEventListener('DOMContentLoaded', () => {
+  const fontLink = document.getElementById('googleFonts');
+  if (fontLink) {
+    fontLink.media = 'all';
+  }
+});
+
 // 缓存DOM元素和状态
 const domCache = {};
 let bookmarksData = null;
