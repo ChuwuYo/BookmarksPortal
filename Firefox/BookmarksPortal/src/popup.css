@@ -4,7 +4,7 @@
   --md-sys-color-on-primary: #fafcda;
   --md-sys-color-surface-container: #ffffffdf;  /* 表面容器颜色 */
   --md-sys-color-outline: #79747E;      /* 轮廓颜色 */
-  --md-sys-elevation-1: 0px 1px 3px 1px rgba(0, 0, 0, 0.15); /* 高程阴影 */
+  --md-sys-elevation-1: none; /* 移除阴影 */
   --md-motion-standard-easing: cubic-bezier(0.4, 0, 0.2, 1); /* 标准动画曲线 */
 }
 
@@ -46,8 +46,8 @@ h1 {
   max-height: 400px;
   overflow-y: auto;
   scroll-behavior: smooth;
-  background-color: #f8fcfb9b;
-  box-shadow: var(--md-sys-elevation-1); /* 高程阴影 */
+  background-color: rgba(var(--md-sys-color-primary), 0.04); /* 增加背景色深度 */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); /* 添加轻微阴影增强层次感 */
 }
 
 /* 自定义滚动条 */
@@ -215,7 +215,7 @@ button.secondary:hover::after {
 
 button:focus {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(var(--md-sys-color-primary), 0.12);
+  box-shadow: none; /* 移除阴影 */
 }
 
 button.secondary {
@@ -237,7 +237,7 @@ button.secondary {
 
 .search-input:focus {
   border-color: var(--md-sys-color-primary);
-  box-shadow: 0 0 0 2px rgba(var(--md-sys-color-primary), 0.2);
+  box-shadow: none; /* 移除阴影 */
 }
 
 /* 语言切换按钮优化 */
