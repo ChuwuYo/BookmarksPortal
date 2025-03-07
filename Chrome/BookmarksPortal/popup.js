@@ -1,6 +1,12 @@
+// 监听 DOMContentLoaded 事件
+// DOMContentLoaded 事件会在 HTML 文档被完全加载和解析完成后触发，而无需等待样式表、图像和子框架完成加载
 document.addEventListener('DOMContentLoaded', () => {
+  // 通过元素的 id 属性获取 Google Fonts 链接元素
   const fontLink = document.getElementById('googleFonts');
+  // 检查是否成功获取到了 id 为 'googleFonts' 的元素
   if (fontLink) {
+    // 如果成功获取到元素，则将该元素的 media 属性设置为 'all'
+    // media 属性用于指定样式表适用的设备类型或媒体查询条件
     fontLink.media = 'all';
   }
 });
