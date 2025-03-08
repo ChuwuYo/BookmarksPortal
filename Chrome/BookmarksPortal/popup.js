@@ -307,7 +307,7 @@ async function exportSelectedBookmarks() {
   } catch (error) {
     console.error('Error exporting bookmarks:', error);
     alert(currentLang === 'zh' ? 
-      '导出过程中发生错误，请查看控制台了解详情。' : 
+      '导出过程中发生错误，请查看控制台以了解详情。' : 
       'Error occurred during export, please check console for details.');
   } finally {
     // 恢复按钮状态
