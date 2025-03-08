@@ -294,7 +294,12 @@ async function exportSelectedBookmarks() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `bookmarks⏰${new Date().toISOString().split('T')[0]}.json`;
+    const localDate = new Date().toLocaleDateString('zh-CN', {  //导出时间从UTC时间转换为本地时间
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    }).replace(/\//g, '-'); // 将日期格式化为 YYYY-MM-DD
+    a.download = `bookmarks⏰${localDate}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
