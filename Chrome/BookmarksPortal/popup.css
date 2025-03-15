@@ -70,14 +70,14 @@ h1 {
 
 .bookmark-tree {
   flex-grow: 1;
-  border: 1px solid rgba(var(--md-sys-color-outline-rgb), 0.3);
+  border: 1px solid #a4d1c4;
   border-radius: var(--border-radius-large);
   padding: 8px;
   max-height: 400px;
   overflow-y: auto;
   scroll-behavior: smooth;
   background-color: rgba(var(--md-sys-color-primary-rgb), 0.04); /* 增加背景色深度 */
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); /* 添加轻微阴影增强层次感 */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2); /* 添加轻微阴影增强层次感 */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   transform-style: flat;
@@ -95,9 +95,9 @@ h1 {
 }
 
 .bookmark-tree::-webkit-scrollbar-thumb {
-  background: rgba(var(--md-sys-color-outline), 0.5); /* 稍微加深颜色，便于识别 */
+  background: rgba(var(--md-sys-color-outline), 0.8); /* 稍微加深颜色，便于识别 */
   border-radius: 10px; /* 增加圆润度 */
-  border: 1px solid transparent; /* 添加边界，避免边缘冲突 */
+  border: 1px solid transparent ; /* 添加边界，避免边缘冲突 */
   background-clip: padding-box; /* 确保圆角内填充 */
 }
 
@@ -117,7 +117,7 @@ h1 {
   padding: 10px 12px;
   border-radius: var(--border-radius-medium);
   transition: var(--transition-standard);
-  background-color: #f3f3f3;
+  background-color: #eeeeee;
   will-change: transform, background-color;
 }
 
@@ -153,7 +153,7 @@ h1 {
   appearance: none; /* 移除默认样式 */
   -webkit-appearance: none;
   border: 2px solid var(--md-sys-color-outline);
-  border-radius: 4px;
+  border-radius: 5px;
   background-color: #fff;
   cursor: pointer;
   position: relative;
@@ -301,7 +301,7 @@ button:focus {
 }
 
 #languageToggle:hover {
-  background: rgba(var(--md-sys-color-primary), 0.8);
+  background: rgba(238, 225, 246, 0.674);
 }
 
 #languageToggle::after {
