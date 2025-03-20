@@ -245,8 +245,16 @@ async function exportSelectedBookmarks() {
       children: []
     }];
   
-    // 获取所有选中的节点ID
-    const selectedIds = new Set(Array.from(selectedCheckboxes).map(cb => cb.dataset.id));
+    // 获取所有选中的节点ID和部分选中的节点ID
+    const selectedCheckboxesArray = Array.from(selectedCheckboxes);
+    const selectedIds = new Set(selectedCheckboxesArray.map(cb => cb.dataset.id));
+    
+    // 添加部分选中的节点ID
+    const indeterminateCheckboxes = document.querySelectorAll('.node-checkbox:indeterminate');
+    const indeterminateIds = new Set(Array.from(indeterminateCheckboxes).map(cb => cb.dataset.id));
+    
+    // 合并选中和部分选中的节点ID
+    const allRelevantIds = new Set([...selectedIds, ...indeterminateIds]);
   
     // 优化的递归处理函数
     function processNode(node) {
@@ -265,12 +273,14 @@ async function exportSelectedBookmarks() {
           icon: hostname ? `https://www.google.com/s2/favicons?domain=${hostname}` : ''
         };
       } else if (node.children) {
+        // 使用allRelevantIds来过滤子节点，包括部分选中的节点
         const processedChildren = node.children
-          .filter(child => selectedIds.has(child.id))
+          .filter(child => selectedIds.has(child.id) || indeterminateIds.has(child.id))
           .map(child => processNode(child))
           .filter(Boolean);
   
-        if (processedChildren.length > 0 || selectedIds.has(node.id)) {
+        // 如果节点本身被选中，或者是部分选中状态，或者有处理后的子节点，则保留该节点
+        if (processedChildren.length > 0 || selectedIds.has(node.id) || indeterminateIds.has(node.id)) {
           return {
             type: 'folder',
             addDate: Number(node.dateAdded),
@@ -284,7 +294,7 @@ async function exportSelectedBookmarks() {
   
     // 批量处理书签栏的直接子节点
     exportData[0].children = bookmarkBar.children
-      .filter(child => selectedIds.has(child.id))
+      .filter(child => selectedIds.has(child.id) || indeterminateIds.has(child.id))
       .map(child => processNode(child))
       .filter(Boolean);
   
