@@ -22,10 +22,20 @@ html {
   margin: 0;
   padding: 0;
   height: 100%; /* 确保 html 填满视口 */
-  background-color: #f8fcfb; /* 与 .bookmark-tree 一致的背景色，消除黑边 */
+  background-color: #f8fcfb;
 }
 
+/* 定义字体 */
+@font-face {
+  font-family: 'AlibabaHealthFont';
+  src: url('./typefaces/AlibabaHealthFont2.0CN-45R.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* 应用字体 */
 body {
+  font-family: 'AlibabaHealthFont', 'Roboto', system-ui, sans-serif;
   width: 350px;
   min-height: 500px;
   margin: 0;
@@ -46,7 +56,7 @@ body {
   border: none !important;
   box-shadow: none !important;
   outline: none !important;
-  background-color: #f8fcfb !important; /* 修改为不透明背景，消除黑边 */
+  background-color: #f8fcfb !important;
 }
 
 .container {
@@ -54,7 +64,7 @@ body {
   flex-direction: column;
   gap: 12px;
   height: 100%;
-  overflow: hidden; /* 防止内容溢出 */
+  overflow: hidden;
 }
 
 h1 {
@@ -64,7 +74,7 @@ h1 {
   color: var(--md-sys-color-primary);
   text-align: center;
   padding: 12px;
-  border-radius: 28px; /* 胶囊形状 */
+  border-radius: 28px;
   background-color: rgba(var(--md-sys-color-primary), 0.08);
 }
 
@@ -77,7 +87,7 @@ h1 {
   overflow-y: auto;
   scroll-behavior: smooth;
   background-color: rgba(var(--md-sys-color-primary-rgb), 0.04); /* 增加背景色深度 */
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2); /* 添加轻微阴影增强层次感 */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   transform-style: flat;
@@ -332,4 +342,8 @@ button.loading::after {
   border-right-color: transparent;
   width: 20px;
   height: 20px;
+}
+/* 其他需要应用字体的元素 */
+h1, .node-title, .search-input, button {
+  font-family: 'AlibabaHealthFont', 'Roboto', system-ui, sans-serif;
 }
