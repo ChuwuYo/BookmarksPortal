@@ -1,0 +1,37 @@
+{
+  "manifest_version": 3,
+  "name": "书签传送门-BookmarksPortal",
+  "description": "导出选定的书签为规整的JSON格式文件（传送!!） - Export the selected bookmarks as a structured JSON file (Transmit!!)",
+  "version": "3.6.0",
+  "permissions": [
+    "bookmarks"
+  ],
+  "host_permissions": [
+    "https://www.google.com/s2/favicons?*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'self' https://www.google.com"
+  },
+  "web_accessible_resources": [{
+    "resources": [
+      "typefaces/*.ttf"
+    ],
+    "matches": ["<all_urls>"]
+  }],
+  "minimum_chrome_version": "88"
+}
