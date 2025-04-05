@@ -1,16 +1,4 @@
-// 监听 DOMContentLoaded 事件
-// DOMContentLoaded 事件会在 HTML 文档被完全加载和解析完成后触发，而无需等待样式表、图像和子框架完成加载
-document.addEventListener('DOMContentLoaded', () => {
-  // 通过元素的 id 属性获取 Google Fonts 链接元素
-  const fontLink = document.getElementById('googleFonts');
-  // 检查是否成功获取到了 id 为 'googleFonts' 的元素
-  if (fontLink) {
-    // 如果成功获取到元素，则将该元素的 media 属性设置为 'all'
-    // media 属性用于指定样式表适用的设备类型或媒体查询条件
-    fontLink.media = 'all';
-  }
-});
-
+// DOMContentLoaded 事件会在 HTML 文档被完全加载和解析完成后触发
 // 缓存DOM元素和状态
 const domCache = {};
 let bookmarksData = null;
@@ -26,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 使用事件委托处理按钮点击
   document.querySelector('.button-group').addEventListener('click', handleButtonClick);
-  
+
   // 语言切换按钮事件
   domCache.languageToggle.addEventListener('click', () => {
     currentLang = currentLang === 'zh' ? 'en' : 'zh';
@@ -64,7 +52,7 @@ function renderBookmarkTree(nodes) {
 function createTreeNode(node, depth = 0) {
   const item = document.createElement('div');
   item.className = 'bookmark-node';
-  
+
   const header = document.createElement('div');
   header.className = 'node-header';
   header.style.paddingLeft = `${depth * 16}px`;
@@ -106,7 +94,7 @@ function createTreeNode(node, depth = 0) {
     const childrenContainer = document.createElement('div');
     childrenContainer.className = 'children-container';
     childrenContainer.style.display = 'none';
-    
+
     node.children.forEach(child => {
       childrenContainer.appendChild(createTreeNode(child, depth + 1));
     });
@@ -127,7 +115,7 @@ function createTreeNode(node, depth = 0) {
 function toggleChildren(container) {
   const children = container.querySelector('.children-container');
   const toggleBtn = container.querySelector('.toggle-btn');
-  
+
   if (children.style.display === 'none') {
     children.style.display = 'block';
     toggleBtn.textContent = '▼';
@@ -171,7 +159,7 @@ function updateParentCheckbox(container) {
 
   const parentCheckbox = parentContainer.querySelector(':scope > .node-header > .node-checkbox');
   const childCheckboxes = container.parentElement.querySelectorAll(':scope > .bookmark-node > .node-header > .node-checkbox');
-  
+
   const checkedCount = Array.from(childCheckboxes).filter(cb => cb.checked).length;
   const totalCount = childCheckboxes.length;
 
@@ -221,41 +209,41 @@ async function processBookmarkNode(node) {
 async function exportSelectedBookmarks() {
   const selectedCheckboxes = document.querySelectorAll('.node-checkbox:checked');
   if (selectedCheckboxes.length === 0) {
-    alert(currentLang === 'zh' ? '请至少选择一个项目！' : 'Please select at least one item!');
+    alert(translations[currentLang].noSelection);
     return;
   }
-  
+
   // 显示加载状态
   const exportButton = domCache.exportButton;
   const originalText = exportButton.textContent;
   exportButton.disabled = true;
-  exportButton.textContent = currentLang === 'zh' ? '导出中...' : 'Exporting...';
+  exportButton.textContent = translations[currentLang].exporting;
   exportButton.classList.add('loading');
-  
+
   try {
     // 获取完整的书签树
     const [rootNode] = await new Promise(resolve => chrome.bookmarks.getTree(resolve));
     const bookmarkBar = rootNode.children[0]; // 书签栏节点
-  
+
     // 创建导出数据的基本结构
     const exportData = [{
       type: 'folder',
       addDate: Date.now(),
-      title: currentLang === 'zh' ? '书签栏' : 'Bookmarks Bar',
+      title: translations[currentLang].bookmarksBar,
       children: []
     }];
-  
+
     // 获取所有选中的节点ID和部分选中的节点ID
     const selectedCheckboxesArray = Array.from(selectedCheckboxes);
     const selectedIds = new Set(selectedCheckboxesArray.map(cb => cb.dataset.id));
-    
+
     // 添加部分选中的节点ID
     const indeterminateCheckboxes = document.querySelectorAll('.node-checkbox:indeterminate');
     const indeterminateIds = new Set(Array.from(indeterminateCheckboxes).map(cb => cb.dataset.id));
-    
+
     // 合并选中和部分选中的节点ID
     const allRelevantIds = new Set([...selectedIds, ...indeterminateIds]);
-  
+
     // 优化的递归处理函数
     function processNode(node) {
       if (node.url) {
@@ -278,7 +266,7 @@ async function exportSelectedBookmarks() {
           .filter(child => selectedIds.has(child.id) || indeterminateIds.has(child.id))
           .map(child => processNode(child))
           .filter(Boolean);
-  
+
         // 如果节点本身被选中，或者是部分选中状态，或者有处理后的子节点，则保留该节点
         if (processedChildren.length > 0 || selectedIds.has(node.id) || indeterminateIds.has(node.id)) {
           return {
@@ -291,13 +279,13 @@ async function exportSelectedBookmarks() {
       }
       return null;
     }
-  
+
     // 批量处理书签栏的直接子节点
     exportData[0].children = bookmarkBar.children
       .filter(child => selectedIds.has(child.id) || indeterminateIds.has(child.id))
       .map(child => processNode(child))
       .filter(Boolean);
-  
+
     // 导出为文件
     const jsonStr = JSON.stringify(exportData, null, 2);
     const blob = new Blob([jsonStr], { type: 'application/json' });
@@ -316,9 +304,7 @@ async function exportSelectedBookmarks() {
     URL.revokeObjectURL(url);
   } catch (error) {
     console.error('Error exporting bookmarks:', error);
-    alert(currentLang === 'zh' ? 
-      '导出过程中发生错误，请查看控制台以了解详情。' : 
-      'Error occurred during export, please check console for details.');
+    alert(translations[currentLang].exportError);
   } finally {
     // 恢复按钮状态
     exportButton.disabled = false;
@@ -331,13 +317,29 @@ const translations = {
     title: "选择要导出的书签",
     selectAll: "选中所有",
     deselectAll: "取消全选",
-    exportButton: "导出书签"
+    exportButton: "导出书签",
+    exporting: "导出中...",
+    noSelection: "请至少选择一个项目！",
+    exportError: "导出过程中发生错误，请查看控制台以了解详情。",
+    bookmarksBar: "书签栏",
+    loading: "加载中...",
+    success: "导出成功！",
+    folderName: "文件夹",
+    linkName: "链接"
   },
   en: {
     title: "Select Your Bookmarks",
     selectAll: "Select All",
     deselectAll: "Deselect All",
-    exportButton: "Transmit !!"
+    exportButton: "Transmit !!",
+    exporting: "Exporting...",
+    noSelection: "Please select at least one item!",
+    exportError: "Error occurred during export, please check console for details.",
+    bookmarksBar: "Bookmarks Bar",
+    loading: "Loading...",
+    success: "Export successful!",
+    folderName: "Folder",
+    linkName: "Link"
   }
 };
 
