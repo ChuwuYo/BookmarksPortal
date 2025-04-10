@@ -25,6 +25,7 @@ html {
   padding: 0;
   height: 100%; /* 确保 html 填满视口 */
   background-color: #f8fcfb; /* 背景颜色 */
+  overflow: hidden; /* 防止滚动条出现导致黑边 */
 }
 
 /* 定义字体 */
@@ -38,8 +39,8 @@ html {
 /* 应用字体 */
 body {
   font-family: 'AlibabaHealthFont', system-ui, sans-serif; /* 设置字体 */
-  width: 350px;
-  min-height: 500px;
+  width: 400px; /* 增加宽度 */
+  min-height: 550px; /* 增加高度 */
   margin: 0;
   padding: 12px;
   color: #1D1B20; /* 更新文字颜色 */
@@ -48,16 +49,8 @@ body {
   overflow: hidden; /* 防止内容溢出 */
   -webkit-font-smoothing: antialiased; /* 字体平滑 */
   -moz-osx-font-smoothing: grayscale;
-  transform-style: flat;
-  backface-visibility: visible;
-  -webkit-backface-visibility: visible;
-  perspective: none;
-  -webkit-perspective: none;
-  transform: none;
-  border: none !important;
-  box-shadow: none !important;
-  outline: none !important;
-  background-color: #f8fcfb !important; /* 背景颜色 */
+  background-color: #f8fcfb; /* 背景颜色 */
+  box-sizing: border-box;
 }
 
 /* 容器布局 */
@@ -67,6 +60,8 @@ body {
   gap: 12px;
   height: 100%;
   overflow: hidden;
+  box-sizing: border-box;
+  max-width: 400px; /* 增加最大宽度 */
 }
 
 /* 标题样式 */
@@ -87,11 +82,11 @@ h1 {
   border: 1px solid #a4d1c4;
   border-radius: var(--border-radius-large);
   padding: 8px;
-  max-height: 400px;
+  max-height: 450px; /* 增加书签树的高度 */
   overflow-y: auto;
   scroll-behavior: smooth;
   background-color: rgba(var(--md-sys-color-primary-rgb), 0.04); /* 增加背景色深度 */
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2); /* 添加阴影 */
+  /* 移除阴影，解决溢出问题 */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   transform-style: flat;
@@ -303,37 +298,30 @@ button:focus {
 
 /* 语言切换按钮优化 */
 #languageToggle {
-  -webkit-text-size-adjust: 100%;
-  tab-size: 4;
-  font-feature-settings: normal;
-  font-variation-settings: normal;
-  -webkit-tap-highlight-color: transparent;
-  font-family: 'AlibabaHealthFont', var(--font-sans), var(--font-head);
+  font-family: 'AlibabaHealthFont', system-ui, sans-serif;
   font-size: 16px;
-  border: 0 solid #e5e7eb;
+  border: none;
   background-color: var(--md-sys-color-primary);
   color: var(--md-sys-color-on-primary);
-  padding: 0.5rem;
+  padding: 8px;
   border-radius: var(--border-radius-medium);
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: center;
-  gap: 1rem;
   cursor: pointer;
-  position: fixed;
+  position: absolute;
   top: 16px;
   right: 20px;
-  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow, 0 0 #0000);
+  box-shadow: none;
   transition: all 0.3s var(--md-motion-standard-easing);
-  width: auto;
-  height: auto;
-  list-style: none;
+  width: 32px;
+  height: 32px;
   margin: 0;
+  z-index: 10;
 }
 
 #languageToggle:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 #languageToggle svg {
@@ -348,7 +336,6 @@ button:focus {
 
 #languageToggle:active {
   transform: translateY(1px);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 /* 加载动画优化 */
