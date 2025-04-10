@@ -303,45 +303,52 @@ button:focus {
 
 /* 语言切换按钮优化 */
 #languageToggle {
-  width: 32px;
-  height: 32px;
-  border-radius: 16px;
-  padding: 4px;
-  background: rgba(203, 241, 236, 0.674);
-  border: none;
-  flex-shrink: 0;
-  min-width: 32px;
-  font-size: 12px;
+  -webkit-text-size-adjust: 100%;
+  tab-size: 4;
+  font-feature-settings: normal;
+  font-variation-settings: normal;
+  -webkit-tap-highlight-color: transparent;
+  font-family: 'AlibabaHealthFont', var(--font-sans), var(--font-head);
+  font-size: 16px;
+  border: 0 solid #e5e7eb;
+  background-color: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+  padding: 0.5rem;
+  border-radius: var(--border-radius-medium);
   display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: center;
+  gap: 1rem;
   cursor: pointer;
   position: fixed;
-  top: 24px;
-  right: 24px;
-  overflow: visible; /* 允许动画溢出 */
+  top: 16px;
+  right: 20px;
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow, 0 0 #0000);
   transition: all 0.3s var(--md-motion-standard-easing);
-  -webkit-tap-highlight-color: transparent;
+  width: auto;
+  height: auto;
+  list-style: none;
+  margin: 0;
 }
 
 #languageToggle:hover {
-  background: rgba(238, 225, 246, 0.674); /* 悬停时背景变色 */
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-#languageToggle::after {
-  content: ''; /* 添加点击效果 */
-  position: absolute;
-  width: 150%;
-  height: 150%;
-  background: radial-gradient(circle, rgba(255,255,255,0.4) 10%, transparent 70%);
-  opacity: 0;
-  transition: opacity 0.3s var(--md-motion-standard-easing);
-  border-radius: 50%;
+#languageToggle svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
 }
 
-#languageToggle:active::after {
-  opacity: 1; /* 点击时显示效果 */
-  transition-duration: 0.1s;
+#languageToggle:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 /* 加载动画优化 */
