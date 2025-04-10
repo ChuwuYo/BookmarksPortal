@@ -1,4 +1,5 @@
 <div align="center">
+
   <img src="https://github.com/user-attachments/assets/e07e52a0-db55-4838-b917-b69185847d9d" alt="BookmarksPortal Logo" width="20%" />
   <h1>BookmarksPortal</h1>
   <h2>Export Your Bookmarks to JSON File.</h2>
@@ -12,7 +13,7 @@
   <p>已支持ExtensionManifestV3规范.</p>
   <p>国内下载链接：<a href="https://pan.baidu.com/s/1Pt0DGpCi9Xu8KtlexGga1A?pwd=0214">Download</a></p>
   <div style="display: flex; justify-content: space-between; margin-top: 20px;">
-    <img src="https://github.com/user-attachments/assets/6b4698bd-fcfc-4d47-83fa-cc07d7b3bae4" alt="Image 1" style="width: 48%; margin-right: 2%; border: 2px solid black;">
-    <img src="https://github.com/user-attachments/assets/32f05526-3a7b-4f86-b8b8-fa7a7cf02ac8" alt="Image 2" style="width: 48%; border: 2px solid black;">
+    <img src="https://github.com/user-attachments/assets/8be6a9bc-0a95-4bc4-a761-4c4b279f2c52" alt="EN" width="283" />
+    <img src="https://github.com/user-attachments/assets/4f775946-dd4b-404d-9cd1-cb62bd0fbc75" alt="ZH-CN" width="281" />
   </div>
 </div>
