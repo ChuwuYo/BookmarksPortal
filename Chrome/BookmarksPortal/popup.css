@@ -345,11 +345,46 @@ button:focus {
 }
 
 button.loading::after {
-  border-width: 3px;
-  border-top-color: var(--md-sys-color-on-primary);
-  border-right-color: transparent;
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  background: rgba(255,255,255,0.2);
+  opacity: 1;
+  transition: opacity 0.3s var(--md-motion-standard-easing);
+}
+
+/* 为加载中按钮添加加载指示器 */
+button.loading::before {
+  content: '';
+  position: absolute;
   width: 20px;
   height: 20px;
+  left: 50%;
+  top: 50%;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  border-top-color: var(--md-sys-color-on-primary);
+  border-right-color: transparent;
+  animation: spin 1s linear infinite;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+}
+
+/* 确保加载动画停止 */
+button:not(.loading)::before {
+  content: none;
+  animation: none;
+}
+
+button:not(.loading)::after {
+  opacity: 0;
+}
+
+button:not(.loading):hover::after {
+  opacity: 1; /* 确保非loading状态下悬停效果正常显示 */
 }
 
 /* 其他应用字体的元素 */
