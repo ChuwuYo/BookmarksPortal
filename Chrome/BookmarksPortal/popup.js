@@ -220,6 +220,9 @@ async function exportSelectedBookmarks() {
   exportButton.textContent = translations[currentLang].exporting;
   exportButton.classList.add('loading');
 
+  // 记录开始时间，用于确保最短动画时长
+  const startTime = Date.now();
+
   try {
     // 获取完整的书签树
     const [rootNode] = await new Promise(resolve => chrome.bookmarks.getTree(resolve));
@@ -306,9 +309,24 @@ async function exportSelectedBookmarks() {
     console.error('Error exporting bookmarks:', error);
     alert(translations[currentLang].exportError);
   } finally {
-    // 恢复按钮状态
-    exportButton.disabled = false;
-    exportButton.textContent = originalText;
+    // 计算已经过去的时间
+    const elapsedTime = Date.now() - startTime;
+    const minAnimationTime = 1000; // 最短动画时间为1秒
+    
+    // 如果已经过去的时间小于最短动画时间，则延迟恢复按钮状态
+    if (elapsedTime < minAnimationTime) {
+      setTimeout(() => {
+        // 恢复按钮状态
+        exportButton.disabled = false;
+        exportButton.textContent = originalText;
+        exportButton.classList.remove('loading'); // 移除loading类，停止加载动画
+      }, minAnimationTime - elapsedTime);
+    } else {
+      // 已经超过最短动画时间，直接恢复按钮状态
+      exportButton.disabled = false;
+      exportButton.textContent = originalText;
+      exportButton.classList.remove('loading'); // 移除loading类，停止加载动画
+    }
   }
 }
 
