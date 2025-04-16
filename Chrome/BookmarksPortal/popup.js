@@ -5,7 +5,7 @@ let bookmarksData = null;
 
 document.addEventListener('DOMContentLoaded', () => {
   // 缓存常用DOM元素
-  ['title', 'selectAll', 'deselectAll', 'exportButton', 'languageToggle', 'bookmarkList'].forEach(id => {
+  ['title', 'selectAll', 'deselectAll', 'exportButton', 'languageToggle', 'bookmarkList', 'loadOptionsButton'].forEach(id => {
     domCache[id] = document.getElementById(id);
   });
 
@@ -20,6 +20,9 @@ document.addEventListener('DOMContentLoaded', () => {
     currentLang = currentLang === 'zh' ? 'en' : 'zh';
     applyLanguage();
   });
+
+  // 加载上次选项按钮事件
+  domCache.loadOptionsButton.addEventListener('click', loadCheckedOptions);
 
   // 获取并展示完整书签树
   chrome.bookmarks.getTree(bookmarkTree => {
@@ -206,12 +209,88 @@ async function processBookmarkNode(node) {
 }
 
 // 导出选中的书签
+// 保存当前勾选状态到localStorage
+function saveCheckedOptions() {
+  const checkedBoxes = document.querySelectorAll('.node-checkbox:checked');
+  const indeterminateBoxes = document.querySelectorAll('.node-checkbox:indeterminate');
+
+  const checkedIds = Array.from(checkedBoxes).map(cb => cb.dataset.id);
+  const indeterminateIds = Array.from(indeterminateBoxes).map(cb => cb.dataset.id);
+
+  const savedOptions = {
+    checkedIds,
+    indeterminateIds,
+    timestamp: Date.now()
+  };
+
+  localStorage.setItem('bookmarksPortalOptions', JSON.stringify(savedOptions));
+}
+
+// 加载上次勾选状态
+function loadCheckedOptions() {
+  const savedOptionsStr = localStorage.getItem('bookmarksPortalOptions');
+  if (!savedOptionsStr) {
+    alert(translations[currentLang].noSavedOptions);
+    return;
+  }
+
+  try {
+    // 显示加载状态
+    const loadButton = domCache.loadOptionsButton;
+    loadButton.classList.add('loading');
+
+    // 记录开始时间，用于确保最短动画时长
+    const startTime = Date.now();
+
+    const savedOptions = JSON.parse(savedOptionsStr);
+    const { checkedIds, indeterminateIds } = savedOptions;
+
+    // 先重置所有复选框
+    document.querySelectorAll('.node-checkbox').forEach(checkbox => {
+      checkbox.checked = false;
+      checkbox.indeterminate = false;
+    });
+
+    // 设置勾选状态
+    checkedIds.forEach(id => {
+      const checkbox = document.querySelector(`.node-checkbox[data-id="${id}"]`);
+      if (checkbox) checkbox.checked = true;
+    });
+
+    // 设置部分选中状态
+    indeterminateIds.forEach(id => {
+      const checkbox = document.querySelector(`.node-checkbox[data-id="${id}"]`);
+      if (checkbox) checkbox.indeterminate = true;
+    });
+
+    // 计算已经过去的时间
+    const elapsedTime = Date.now() - startTime;
+    const minAnimationTime = 500; // 最短动画时间为0.5秒
+
+    // 如果已经过去的时间小于最短动画时间，则延迟恢复按钮状态
+    if (elapsedTime < minAnimationTime) {
+      setTimeout(() => {
+        loadButton.classList.remove('loading');
+      }, minAnimationTime - elapsedTime);
+    } else {
+      loadButton.classList.remove('loading');
+    }
+  } catch (error) {
+    console.error('Error loading options:', error);
+    alert(translations[currentLang].loadError);
+    domCache.loadOptionsButton.classList.remove('loading');
+  }
+}
+
 async function exportSelectedBookmarks() {
   const selectedCheckboxes = document.querySelectorAll('.node-checkbox:checked');
   if (selectedCheckboxes.length === 0) {
     alert(translations[currentLang].noSelection);
     return;
   }
+
+  // 保存本次勾选状态到localStorage
+  saveCheckedOptions();
 
   // 显示加载状态
   const exportButton = domCache.exportButton;
@@ -312,7 +391,7 @@ async function exportSelectedBookmarks() {
     // 计算已经过去的时间
     const elapsedTime = Date.now() - startTime;
     const minAnimationTime = 1000; // 最短动画时间为1秒
-    
+
     // 如果已经过去的时间小于最短动画时间，则延迟恢复按钮状态
     if (elapsedTime < minAnimationTime) {
       setTimeout(() => {
@@ -343,7 +422,10 @@ const translations = {
     loading: "加载中...",
     success: "导出成功！",
     folderName: "文件夹",
-    linkName: "链接"
+    linkName: "链接",
+    noSavedOptions: "没有找到已保存的选项！",
+    loadError: "加载选项时发生错误，请查看控制台以了解详情。",
+    loadOptions: "加载上次选择"
   },
   en: {
     title: "Select Your Bookmarks",
@@ -357,7 +439,10 @@ const translations = {
     loading: "Loading...",
     success: "Export successful!",
     folderName: "Folder",
-    linkName: "Link"
+    linkName: "Link",
+    noSavedOptions: "No saved options found!",
+    loadError: "Error loading options, please check console for details.",
+    loadOptions: "Load Last Selection"
   }
 };
 
@@ -369,4 +454,5 @@ function applyLanguage() {
   domCache.selectAll.textContent = translations[currentLang].selectAll;
   domCache.deselectAll.textContent = translations[currentLang].deselectAll;
   domCache.exportButton.textContent = translations[currentLang].exportButton;
+  domCache.loadOptionsButton.setAttribute('aria-label', translations[currentLang].loadOptions);
 }

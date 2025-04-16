@@ -16,17 +16,25 @@
 </head>
 <body>
   <div class="container">
-    <h1 id="title">选择要导出的书签</h1>
-    <button id="languageToggle" type="button" aria-label="Switch language">
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-languages">
-        <path d="m5 8 6 6"></path>
-        <path d="m4 14 6-6 2-3"></path>
-        <path d="M2 5h12"></path>
-        <path d="M7 2h1"></path>
-        <path d="m22 22-5-10-5 10"></path>
-        <path d="M14 18h6"></path>
-      </svg>
-    </button>
+    <div class="header-controls">
+      <button id="loadOptionsButton" type="button" aria-label="Load last options" class="secondary">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-history">
+          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+          <path d="M3 3v5h5"/>
+        </svg>
+      </button>
+      <h1 id="title">选择要导出的书签</h1>
+      <button id="languageToggle" type="button" aria-label="Switch language" class="secondary">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-languages">
+          <path d="m5 8 6 6"></path>
+          <path d="m4 14 6-6 2-3"></path>
+          <path d="M2 5h12"></path>
+          <path d="M7 2h1"></path>
+          <path d="m22 22-5-10-5 10"></path>
+          <path d="M14 18h6"></path>
+        </svg>
+      </button>
+    </div>
     <div id="bookmarkList" class="bookmark-tree" role="tree"></div>
     <div class="controls">
       <div class="button-group">
