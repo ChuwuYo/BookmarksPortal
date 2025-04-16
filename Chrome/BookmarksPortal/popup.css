@@ -296,22 +296,29 @@ button:focus {
   box-shadow: none; /* 移除阴影 */
 }
 
-/* 语言切换按钮优化 */
-#languageToggle {
+/* 头部按钮共享样式 */
+.header-controls {
+  position: relative;
+  width: 100%;
+  text-align: center; /* 居中标题 */
+}
+
+/* 语言切换按钮和加载选项按钮共享样式 */
+#languageToggle,
+#loadOptionsButton {
   font-family: 'AlibabaHealthFont', system-ui, sans-serif;
   font-size: 16px;
   border: none;
   background-color: var(--md-sys-color-primary);
   color: var(--md-sys-color-on-primary);
-  padding: 8px;
+  padding: 6px;
   border-radius: var(--border-radius-medium);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   position: absolute;
-  top: 16px;
-  right: 20px;
+  top: 6px;
   box-shadow: none;
   transition: all 0.3s var(--md-motion-standard-easing);
   width: 32px;
@@ -320,11 +327,23 @@ button:focus {
   z-index: 10;
 }
 
-#languageToggle:hover {
+/* 语言切换按钮位置 */
+#languageToggle {
+  right: 10px;
+}
+
+/* 加载选项按钮位置 */
+#loadOptionsButton {
+  left: 10px;
+}
+
+#languageToggle:hover,
+#loadOptionsButton:hover {
   transform: translateY(-2px);
 }
 
-#languageToggle svg {
+#languageToggle svg,
+#loadOptionsButton svg {
   width: 16px;
   height: 16px;
   stroke: currentColor;
@@ -334,7 +353,8 @@ button:focus {
   fill: none;
 }
 
-#languageToggle:active {
+#languageToggle:active,
+#loadOptionsButton:active {
   transform: translateY(1px);
 }
 
