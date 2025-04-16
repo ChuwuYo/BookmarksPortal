@@ -6,14 +6,24 @@ let bookmarksData = null;
 document.addEventListener('DOMContentLoaded', () => {
   // 缓存常用DOM元素
   ['title', 'selectAll', 'deselectAll', 'exportButton', 'languageToggle', 'bookmarkList', 'loadOptionsButton'].forEach(id => {
-    domCache[id] = document.getElementById(id);
+    const element = document.getElementById(id);
+    if (!element) {
+      console.error(`Element with id ${id} not found`);
+      return;
+    }
+    domCache[id] = element;
   });
 
   // 初始化语言
   applyLanguage();
 
   // 使用事件委托处理按钮点击
-  document.querySelector('.button-group').addEventListener('click', handleButtonClick);
+  const buttonGroup = document.querySelector('.button-group');
+  if (buttonGroup) {
+    buttonGroup.addEventListener('click', handleButtonClick);
+  } else {
+    console.error('Button group not found');
+  }
 
   // 语言切换按钮事件
   domCache.languageToggle.addEventListener('click', () => {
