@@ -435,7 +435,8 @@ const translations = {
     linkName: "链接",
     noSavedOptions: "没有找到已保存的选项！",
     loadError: "加载选项时发生错误，请查看控制台以了解详情。",
-    loadOptions: "加载上次选择"
+    loadOptions: "加载上次选择",
+    back: "返回"
   },
   en: {
     title: "Select Your Bookmarks",
@@ -452,7 +453,8 @@ const translations = {
     linkName: "Link",
     noSavedOptions: "No saved options found!",
     loadError: "Error loading options, please check console for details.",
-    loadOptions: "Load Last Selection"
+    loadOptions: "Load Last Selection",
+    back: "Back"
   }
 };
 
