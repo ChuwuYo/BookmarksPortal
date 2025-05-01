@@ -171,20 +171,39 @@ function updateParentCheckbox(container) {
   if (!parentContainer) return;
 
   const parentCheckbox = parentContainer.querySelector(':scope > .node-header > .node-checkbox');
-  const childCheckboxes = container.parentElement.querySelectorAll(':scope > .bookmark-node > .node-header > .node-checkbox');
+  // 使用直接子容器下的复选框进行判断
+  const childCheckboxes = parentContainer.querySelectorAll(':scope > .children-container > .bookmark-node > .node-header > .node-checkbox');
 
-  const checkedCount = Array.from(childCheckboxes).filter(cb => cb.checked).length;
+  if (childCheckboxes.length === 0) {
+      // 如果没有子复选框，父节点的 indeterminate 状态应为 false
+      if(parentCheckbox) parentCheckbox.indeterminate = false;
+      // 递归更新上层父节点
+      updateParentCheckbox(parentContainer);
+      return; // 结束当前函数执行
+  }
+
+
+  let checkedCount = 0;
+  let indeterminateCount = 0;
+  childCheckboxes.forEach(cb => {
+      if (cb.checked) {
+          checkedCount++;
+      } else if (cb.indeterminate) {
+          indeterminateCount++;
+      }
+  });
+
   const totalCount = childCheckboxes.length;
 
-  if (checkedCount === totalCount) {
-    parentCheckbox.checked = true;
-    parentCheckbox.indeterminate = false;
-  } else if (checkedCount === 0) {
-    parentCheckbox.checked = false;
-    parentCheckbox.indeterminate = false;
-  } else {
+  if (indeterminateCount > 0 || (checkedCount > 0 && checkedCount < totalCount)) {
     parentCheckbox.checked = false;
     parentCheckbox.indeterminate = true;
+  } else if (checkedCount === totalCount) {
+    parentCheckbox.checked = true;
+    parentCheckbox.indeterminate = false;
+  } else { // checkedCount === 0 && indeterminateCount === 0
+    parentCheckbox.checked = false;
+    parentCheckbox.indeterminate = false;
   }
 
   // 递归更新上层父节点
@@ -219,24 +238,28 @@ async function processBookmarkNode(node) {
 }
 
 // 导出选中的书签
-// 保存当前勾选状态到localStorage
+// 保存当前未勾选状态到localStorage
 function saveCheckedOptions() {
-  const checkedBoxes = document.querySelectorAll('.node-checkbox:checked');
-  const indeterminateBoxes = document.querySelectorAll('.node-checkbox:indeterminate');
+  const allCheckboxes = document.querySelectorAll('.node-checkbox');
+  const uncheckedIds = [];
 
-  const checkedIds = Array.from(checkedBoxes).map(cb => cb.dataset.id);
-  const indeterminateIds = Array.from(indeterminateBoxes).map(cb => cb.dataset.id);
+  allCheckboxes.forEach(checkbox => {
+    // 只保存明确未选中的项（非checked且非indeterminate）
+    if (!checkbox.checked && !checkbox.indeterminate) {
+      uncheckedIds.push(checkbox.dataset.id);
+    }
+  });
 
   const savedOptions = {
-    checkedIds,
-    indeterminateIds,
+    uncheckedIds, // 保存未选中的ID
     timestamp: Date.now()
   };
 
   localStorage.setItem('bookmarksPortalOptions', JSON.stringify(savedOptions));
+  console.log('Saved unchecked options:', uncheckedIds); // 添加日志方便调试
 }
 
-// 加载上次勾选状态
+// 加载上次勾选状态（新逻辑：全选 - 取消上次未选的）
 function loadCheckedOptions() {
   const savedOptionsStr = localStorage.getItem('bookmarksPortalOptions');
   if (!savedOptionsStr) {
@@ -253,25 +276,40 @@ function loadCheckedOptions() {
     const startTime = Date.now();
 
     const savedOptions = JSON.parse(savedOptionsStr);
-    const { checkedIds, indeterminateIds } = savedOptions;
+    const { uncheckedIds } = savedOptions; // 获取未选中的ID
 
-    // 先重置所有复选框
-    document.querySelectorAll('.node-checkbox').forEach(checkbox => {
-      checkbox.checked = false;
-      checkbox.indeterminate = false;
-    });
+    console.log('Loading unchecked options:', uncheckedIds); // 添加日志方便调试
 
-    // 设置勾选状态
-    checkedIds.forEach(id => {
+    // 1. 全选所有项目
+    toggleAllCheckboxes(true);
+
+    // 2. 取消勾选上次未选中的项目
+    uncheckedIds.forEach(id => {
       const checkbox = document.querySelector(`.node-checkbox[data-id="${id}"]`);
-      if (checkbox) checkbox.checked = true;
+      if (checkbox) {
+        checkbox.checked = false;
+        // 取消勾选后，需要向上更新父节点状态
+        // 注意：直接在这里调用updateParentCheckbox可能效率不高且逻辑复杂
+        // 更好的方法是在下面统一更新
+      }
     });
 
-    // 设置部分选中状态
-    indeterminateIds.forEach(id => {
-      const checkbox = document.querySelector(`.node-checkbox[data-id="${id}"]`);
-      if (checkbox) checkbox.indeterminate = true;
-    });
+    // 3. 统一更新所有父节点的勾选状态
+    // 遍历所有包含子节点的 bookmark-node，从底层向上更新状态
+    const folderNodes = document.querySelectorAll('.bookmark-node');
+    // 反向遍历以确保子节点状态先确定
+    for (let i = folderNodes.length - 1; i >= 0; i--) {
+        const node = folderNodes[i];
+        // 检查是否是文件夹（通过是否有子容器判断）
+        if (node.querySelector('.children-container')) {
+            // 找到它的直接子节点的复选框来更新状态
+            const directChildrenCheckboxes = node.querySelectorAll(':scope > .children-container > .bookmark-node > .node-header > .node-checkbox');
+            if (directChildrenCheckboxes.length > 0) {
+                 updateParentCheckboxBasedOnDirectChildren(node);
+            }
+        }
+    }
+
 
     // 计算已经过去的时间
     const elapsedTime = Date.now() - startTime;
@@ -291,6 +329,49 @@ function loadCheckedOptions() {
     domCache.loadOptionsButton.classList.remove('loading');
   }
 }
+
+// 新增一个辅助函数，根据直接子节点的勾选状态更新父节点
+// 这是对原 updateParentCheckbox 的调整，避免无限递归或错误更新
+function updateParentCheckboxBasedOnDirectChildren(parentNode) {
+    const parentCheckbox = parentNode.querySelector(':scope > .node-header > .node-checkbox');
+    if (!parentCheckbox) return; // 如果找不到父复选框，则退出
+
+    const childCheckboxes = parentNode.querySelectorAll(':scope > .children-container > .bookmark-node > .node-header > .node-checkbox');
+    if (childCheckboxes.length === 0) {
+        // 如果没有子复选框（可能是空文件夹或只有链接），根据自身是否被选中决定状态
+        // 但在此场景下，我们依赖子节点状态，若无子节点，父节点状态应由其自身是否在 uncheckedIds 中决定
+        // 不过全选后取消勾选的逻辑已处理了自身状态，这里主要处理文件夹的 indeterminate
+         parentCheckbox.indeterminate = false; // 没有子项，不应是 indeterminate
+        return;
+    }
+
+    let checkedCount = 0;
+    let indeterminateCount = 0;
+    childCheckboxes.forEach(cb => {
+        if (cb.checked) {
+            checkedCount++;
+        } else if (cb.indeterminate) {
+            indeterminateCount++;
+        }
+    });
+
+    const totalCount = childCheckboxes.length;
+
+    if (indeterminateCount > 0 || (checkedCount > 0 && checkedCount < totalCount)) {
+        // 如果有子节点是 indeterminate，或者部分子节点被选中，则父节点是 indeterminate
+        parentCheckbox.checked = false;
+        parentCheckbox.indeterminate = true;
+    } else if (checkedCount === totalCount) {
+        // 所有子节点都被选中
+        parentCheckbox.checked = true;
+        parentCheckbox.indeterminate = false;
+    } else { // checkedCount === 0 && indeterminateCount === 0
+        // 所有子节点都未被选中
+        parentCheckbox.checked = false;
+        parentCheckbox.indeterminate = false;
+    }
+}
+
 
 async function exportSelectedBookmarks() {
   const selectedCheckboxes = document.querySelectorAll('.node-checkbox:checked');
