@@ -13,7 +13,7 @@
   <p>已支持ExtensionManifestV3规范.</p>
   <p>国内下载链接：<a href="https://pan.baidu.com/s/1Pt0DGpCi9Xu8KtlexGga1A?pwd=0214">Download</a></p>
   <div style="display: flex; justify-content: space-between; margin-top: 20px;">
-    <img src="https://github.com/user-attachments/assets/8be6a9bc-0a95-4bc4-a761-4c4b279f2c52" alt="EN" width="283" />
-    <img src="https://github.com/user-attachments/assets/4f775946-dd4b-404d-9cd1-cb62bd0fbc75" alt="ZH-CN" width="281" />
+    <img src="https://github.com/user-attachments/assets/2543d8d3-c9bd-4770-9a04-2c252a80bae6" alt="EN" />
+    <img src="https://github.com/user-attachments/assets/3c2bc3c5-9b75-4fd1-a2dc-dbe00a912a53" alt="ZH-CN" />
   </div>
 </div>
