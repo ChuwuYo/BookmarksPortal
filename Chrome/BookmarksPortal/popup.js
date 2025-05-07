@@ -398,11 +398,15 @@ async function exportSelectedBookmarks() {
     const [rootNode] = await new Promise(resolve => chrome.bookmarks.getTree(resolve));
     const bookmarkBar = rootNode.children[0]; // 书签栏节点
 
+    // 获取浏览器界面语言，并确定要使用的语言键
+    const browserUILang = chrome.i18n.getUILanguage();
+    const exportLang = browserUILang && browserUILang.startsWith('zh') ? 'zh' : 'en';
+
     // 创建导出数据的基本结构
     const exportData = [{
       type: 'folder',
       addDate: Date.now(),
-      title: translations[currentLang].bookmarksBar,
+      title: translations[exportLang].bookmarksBar, // 使用浏览器界面语言对应的书签栏标题
       children: []
     }];
 
