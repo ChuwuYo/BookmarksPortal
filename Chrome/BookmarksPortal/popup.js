@@ -34,11 +34,29 @@ document.addEventListener('DOMContentLoaded', () => {
   // 加载上次选项按钮事件
   domCache.loadOptionsButton.addEventListener('click', loadCheckedOptions);
 
+  // 记录加载开始时间
+  const loadStartTime = Date.now();
+
   // 获取并展示完整书签树
   chrome.bookmarks.getTree(bookmarkTree => {
     const bookmarkBar = bookmarkTree[0].children[0];  // 书签栏节点
     bookmarksData = bookmarkBar.children; // 缓存书签数据
     renderBookmarkTree(bookmarksData);
+    
+    // 确保加载动画至少显示 MIN_LOADING_TIME ms
+    const MIN_LOADING_TIME = 500; // 毫秒
+    const elapsedTime = Date.now() - loadStartTime;
+    const container = document.querySelector('.container');
+
+    if (container) {
+      if (elapsedTime < MIN_LOADING_TIME) {
+        setTimeout(() => {
+          container.classList.remove('loading');
+        }, MIN_LOADING_TIME - elapsedTime);
+      } else {
+        container.classList.remove('loading');
+      }
+    }
   });
 });
 

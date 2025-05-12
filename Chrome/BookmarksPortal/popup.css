@@ -31,7 +31,7 @@ html {
 /* 定义字体 */
 @font-face {
   font-family: 'AlibabaHealthFont';
-  src: url('./typefaces/AlibabaHealthFont2.0CN-45R.ttf') format('truetype'); 
+  src: url('./typefaces/AlibabaHealthFont2.0CN-45R.woff2') format('woff2'); 
   font-weight: normal;
   font-style: normal;
 }
@@ -78,6 +78,8 @@ h1 {
 
 /* 书签树样式 */
 .bookmark-tree {
+  min-height: 350px; /* 为加载前占据空间 */
+  transition: opacity 0.5s var(--md-motion-emphasized-easing), transform 0.5s var(--md-motion-emphasized-easing); /* 添加过渡效果 */
   flex-grow: 1;
   border: 1px solid #a4d1c4;
   border-radius: var(--border-radius-large);
@@ -226,6 +228,7 @@ h1 {
 
 /* 控制区域样式 */
 .controls {
+  transition: opacity 0.5s var(--md-motion-emphasized-easing), transform 0.5s var(--md-motion-emphasized-easing); /* 添加过渡效果 */
   padding-top: 12px;
   width: 100%;
 }
@@ -364,6 +367,34 @@ button:focus {
   to { transform: translate(-50%, -50%) rotate(360deg); }
 }
 
+/* 全局加载动画 for .container.loading */
+.container.loading {
+  position: relative; /* Needed for absolute positioning of ::before */
+  min-height: 300px; /* Ensure container has some height for spinner to be visible */
+}
+
+.container.loading::before {
+  content: '';
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 4px solid rgba(0,0,0,0.1); /* Light track for the spinner */
+  border-top-color: #58505b; /* Spinner color, matches theme-color from HTML or use var(--md-sys-color-primary) if defined */
+  animation: spin 1s linear infinite;
+  z-index: 10;
+}
+
+/* Hide spinner when not loading */
+.container:not(.loading)::before {
+  content: none;
+  animation: none;
+  display: none;
+}
+
 button.loading::after {
   content: '';
   position: absolute;
@@ -405,6 +436,13 @@ button:not(.loading)::after {
 
 button:not(.loading):hover::after {
   opacity: 1; /* 确保非loading状态下悬停效果正常显示 */
+}
+
+/* 加载时元素初始状态 */
+.container.loading .bookmark-tree,
+.container.loading .controls {
+  opacity: 0;
+  transform: translateY(20px);
 }
 
 /* 其他应用字体的元素 */
