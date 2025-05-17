@@ -255,6 +255,7 @@ h1 {
   font-weight: 500;
   transition: all 0.3s var(--md-motion-standard-easing);
   position: relative;
+  z-index: 9999; /* 确保按钮在最上层 */
   overflow: hidden;
   text-align: center;
   flex: none;
@@ -327,7 +328,7 @@ button:focus {
   width: 32px;
   height: 32px;
   margin: 0;
-  z-index: 10;
+  z-index: 9999; /* 确保按钮在最上层 */
 }
 
 /* 语言切换按钮位置 */
