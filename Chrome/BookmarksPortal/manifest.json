@@ -4,9 +4,11 @@
   "homepage_url": "https://github.com/ChuwuYo/BookmarksPortal",  
   "author": "ChuwuYo",
   "description": "导出选定的书签为规整的JSON格式文件（传送!!） - Export the selected bookmarks as a structured JSON file (Transmit!!)",
-  "version": "3.9.6",
+  "version": "3.9.7",
   "permissions": [
-    "bookmarks"
+    "bookmarks",
+    "storage",
+    "unlimitedStorage"
   ],
   "host_permissions": [
     "https://www.google.com/s2/favicons?*"
