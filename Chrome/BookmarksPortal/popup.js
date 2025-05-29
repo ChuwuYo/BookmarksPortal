@@ -2,9 +2,24 @@
 // 缓存DOM元素和状态
 const domCache = {};
 let bookmarksData = null;
+let currentLang = navigator.language.startsWith('zh') ? 'zh' : 'en';
 
-document.addEventListener('DOMContentLoaded', () => {
-  // 缓存常用DOM元素
+document.addEventListener('DOMContentLoaded', initializeApp);
+
+/**
+ * 初始化应用程序
+ */
+function initializeApp() {
+  cacheDOMElements();
+  applyLanguage();
+  setupEventListeners();
+  loadBookmarks();
+}
+
+/**
+ * 缓存常用DOM元素
+ */
+function cacheDOMElements() {
   ['title', 'selectAll', 'deselectAll', 'exportButton', 'languageToggle', 'bookmarkList', 'loadOptionsButton'].forEach(id => {
     const element = document.getElementById(id);
     if (!element) {
@@ -13,10 +28,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     domCache[id] = element;
   });
+}
 
-  // 初始化语言
-  applyLanguage();
-
+/**
+ * 设置事件监听器
+ */
+function setupEventListeners() {
   // 使用事件委托处理按钮点击
   const buttonGroup = document.querySelector('.button-group');
   if (buttonGroup) {
@@ -26,14 +43,24 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // 语言切换按钮事件
-  domCache.languageToggle.addEventListener('click', () => {
-    currentLang = currentLang === 'zh' ? 'en' : 'zh';
-    applyLanguage();
-  });
+  domCache.languageToggle.addEventListener('click', toggleLanguage);
 
   // 加载上次选项按钮事件
   domCache.loadOptionsButton.addEventListener('click', loadCheckedOptions);
+}
 
+/**
+ * 切换语言
+ */
+function toggleLanguage() {
+  currentLang = currentLang === 'zh' ? 'en' : 'zh';
+  applyLanguage();
+}
+
+/**
+ * 加载书签
+ */
+function loadBookmarks() {
   // 记录加载开始时间
   const loadStartTime = Date.now();
 
@@ -42,7 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const bookmarkBar = bookmarkTree[0].children[0];  // 书签栏节点
     bookmarksData = bookmarkBar.children; // 缓存书签数据
     renderBookmarkTree(bookmarksData);
-    
+
     // 确保加载动画至少显示 MIN_LOADING_TIME ms
     const MIN_LOADING_TIME = 500; // 毫秒
     const elapsedTime = Date.now() - loadStartTime;
@@ -58,11 +85,14 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
   });
-});
+}
 
-// 使用事件委托处理按钮点击
+/**
+ * 使用事件委托处理按钮点击
+ */
 function handleButtonClick(event) {
   const target = event.target;
+  
   if (target.id === 'selectAll') {
     toggleAllCheckboxes(true);
   } else if (target.id === 'deselectAll') {
@@ -72,18 +102,47 @@ function handleButtonClick(event) {
   }
 }
 
+/**
+ * 渲染书签树
+ */
 function renderBookmarkTree(nodes) {
   const container = document.getElementById('bookmarkList');
   container.innerHTML = '';
+  
   nodes.forEach(node => {
     container.appendChild(createTreeNode(node));
   });
 }
 
+/**
+ * 创建树节点
+ */
 function createTreeNode(node, depth = 0) {
   const item = document.createElement('div');
   item.className = 'bookmark-node';
 
+  const header = createNodeHeader(node, depth, item);
+  item.appendChild(header);
+
+  // 递归处理子节点
+  if (node.children) {
+    const childrenContainer = document.createElement('div');
+    childrenContainer.className = 'children-container';
+    childrenContainer.style.display = 'none';
+
+    node.children.forEach(child => {
+      childrenContainer.appendChild(createTreeNode(child, depth + 1));
+    });
+    item.appendChild(childrenContainer);
+  }
+
+  return item;
+}
+
+/**
+ * 创建节点头部
+ */
+function createNodeHeader(node, depth, parentItem) {
   const header = document.createElement('div');
   header.className = 'node-header';
   header.style.paddingLeft = `${depth * 16}px`;
@@ -93,7 +152,7 @@ function createTreeNode(node, depth = 0) {
     const toggleBtn = document.createElement('span');
     toggleBtn.className = 'toggle-btn collapsed';
     toggleBtn.textContent = '▶';
-    toggleBtn.addEventListener('click', () => toggleChildren(item));
+    toggleBtn.addEventListener('click', () => toggleChildren(parentItem));
     header.appendChild(toggleBtn);
   }
 
@@ -117,32 +176,19 @@ function createTreeNode(node, depth = 0) {
   title.textContent = node.title;
   header.appendChild(title);
 
-  // 组装节点
-  item.appendChild(header);
-
-  // 递归处理子节点
-  if (node.children) {
-    const childrenContainer = document.createElement('div');
-    childrenContainer.className = 'children-container';
-    childrenContainer.style.display = 'none';
-
-    node.children.forEach(child => {
-      childrenContainer.appendChild(createTreeNode(child, depth + 1));
-    });
-    item.appendChild(childrenContainer);
-  }
-
   // 复选框状态变化时更新子节点和父节点
   checkbox.addEventListener('change', () => {
     const checked = checkbox.checked;
-    toggleChildCheckboxes(item, checked);
-    updateParentCheckbox(item);
+    toggleChildCheckboxes(parentItem, checked);
+    updateParentCheckbox(parentItem);
   });
 
-  return item;
+  return header;
 }
 
-// 展开/收起子节点
+/**
+ * 展开/收起子节点
+ */
 function toggleChildren(container) {
   const children = container.querySelector('.children-container');
   const toggleBtn = container.querySelector('.toggle-btn');
@@ -158,7 +204,9 @@ function toggleChildren(container) {
   }
 }
 
-// 全选/取消功能
+/**
+ * 全选/取消功能
+ */
 function toggleAllCheckboxes(checked) {
   // 先重置所有复选框的状态
   document.querySelectorAll('.node-checkbox').forEach(checkbox => {
@@ -174,7 +222,9 @@ function toggleAllCheckboxes(checked) {
   });
 }
 
-// 递归勾选/取消子节点
+/**
+ * 递归勾选/取消子节点
+ */
 function toggleChildCheckboxes(container, checked) {
   const childCheckboxes = container.querySelectorAll('.children-container .node-checkbox');
   childCheckboxes.forEach(cb => {
@@ -183,7 +233,9 @@ function toggleChildCheckboxes(container, checked) {
   });
 }
 
-// 更新父节点的勾选状态
+/**
+ * 更新父节点的勾选状态
+ */
 function updateParentCheckbox(container) {
   const parentContainer = container.parentElement.closest('.bookmark-node');
   if (!parentContainer) return;
@@ -193,22 +245,21 @@ function updateParentCheckbox(container) {
   const childCheckboxes = parentContainer.querySelectorAll(':scope > .children-container > .bookmark-node > .node-header > .node-checkbox');
 
   if (childCheckboxes.length === 0) {
-      // 如果没有子复选框，父节点的 indeterminate 状态应为 false
-      if(parentCheckbox) parentCheckbox.indeterminate = false;
-      // 递归更新上层父节点
-      updateParentCheckbox(parentContainer);
-      return; // 结束当前函数执行
+    // 如果没有子复选框，父节点的 indeterminate 状态应为 false
+    if (parentCheckbox) parentCheckbox.indeterminate = false;
+    // 递归更新上层父节点
+    updateParentCheckbox(parentContainer);
+    return;
   }
-
 
   let checkedCount = 0;
   let indeterminateCount = 0;
   childCheckboxes.forEach(cb => {
-      if (cb.checked) {
-          checkedCount++;
-      } else if (cb.indeterminate) {
-          indeterminateCount++;
-      }
+    if (cb.checked) {
+      checkedCount++;
+    } else if (cb.indeterminate) {
+      indeterminateCount++;
+    }
   });
 
   const totalCount = childCheckboxes.length;
@@ -228,7 +279,9 @@ function updateParentCheckbox(container) {
   updateParentCheckbox(parentContainer);
 }
 
-// 处理书签节点
+/**
+ * 处理书签节点
+ */
 async function processBookmarkNode(node) {
   if (node.url) {
     let hostname = '';
@@ -255,8 +308,9 @@ async function processBookmarkNode(node) {
   }
 }
 
-// 导出选中的书签
-// 保存当前未勾选状态到localStorage
+/**
+ * 保存当前未勾选状态到localStorage
+ */
 function saveCheckedOptions() {
   const allCheckboxes = document.querySelectorAll('.node-checkbox');
   const uncheckedIds = [];
@@ -277,7 +331,9 @@ function saveCheckedOptions() {
   console.log('Saved unchecked options:', uncheckedIds); // 添加日志方便调试
 }
 
-// 加载上次勾选状态（新逻辑：全选 - 取消上次未选的）
+/**
+ * 加载上次勾选状态（新逻辑：全选 - 取消上次未选的）
+ */
 function loadCheckedOptions() {
   const savedOptionsStr = localStorage.getItem('bookmarksPortalOptions');
   if (!savedOptionsStr) {
@@ -306,9 +362,6 @@ function loadCheckedOptions() {
       const checkbox = document.querySelector(`.node-checkbox[data-id="${id}"]`);
       if (checkbox) {
         checkbox.checked = false;
-        // 取消勾选后，需要向上更新父节点状态
-        // 注意：直接在这里调用updateParentCheckbox可能效率不高且逻辑复杂
-        // 更好的方法是在下面统一更新
       }
     });
 
@@ -317,17 +370,16 @@ function loadCheckedOptions() {
     const folderNodes = document.querySelectorAll('.bookmark-node');
     // 反向遍历以确保子节点状态先确定
     for (let i = folderNodes.length - 1; i >= 0; i--) {
-        const node = folderNodes[i];
-        // 检查是否是文件夹（通过是否有子容器判断）
-        if (node.querySelector('.children-container')) {
-            // 找到它的直接子节点的复选框来更新状态
-            const directChildrenCheckboxes = node.querySelectorAll(':scope > .children-container > .bookmark-node > .node-header > .node-checkbox');
-            if (directChildrenCheckboxes.length > 0) {
-                 updateParentCheckboxBasedOnDirectChildren(node);
-            }
+      const node = folderNodes[i];
+      // 检查是否是文件夹（通过是否有子容器判断）
+      if (node.querySelector('.children-container')) {
+        // 找到它的直接子节点的复选框来更新状态
+        const directChildrenCheckboxes = node.querySelectorAll(':scope > .children-container > .bookmark-node > .node-header > .node-checkbox');
+        if (directChildrenCheckboxes.length > 0) {
+          updateParentCheckboxBasedOnDirectChildren(node);
         }
+      }
     }
-
 
     // 计算已经过去的时间
     const elapsedTime = Date.now() - startTime;
@@ -348,49 +400,50 @@ function loadCheckedOptions() {
   }
 }
 
-// 新增一个辅助函数，根据直接子节点的勾选状态更新父节点
-// 这是对原 updateParentCheckbox 的调整，避免无限递归或错误更新
+/**
+ * 根据直接子节点的勾选状态更新父节点
+ */
 function updateParentCheckboxBasedOnDirectChildren(parentNode) {
-    const parentCheckbox = parentNode.querySelector(':scope > .node-header > .node-checkbox');
-    if (!parentCheckbox) return; // 如果找不到父复选框，则退出
+  const parentCheckbox = parentNode.querySelector(':scope > .node-header > .node-checkbox');
+  if (!parentCheckbox) return; // 如果找不到父复选框，则退出
 
-    const childCheckboxes = parentNode.querySelectorAll(':scope > .children-container > .bookmark-node > .node-header > .node-checkbox');
-    if (childCheckboxes.length === 0) {
-        // 如果没有子复选框（可能是空文件夹或只有链接），根据自身是否被选中决定状态
-        // 但在此场景下，我们依赖子节点状态，若无子节点，父节点状态应由其自身是否在 uncheckedIds 中决定
-        // 不过全选后取消勾选的逻辑已处理了自身状态，这里主要处理文件夹的 indeterminate
-         parentCheckbox.indeterminate = false; // 没有子项，不应是 indeterminate
-        return;
+  const childCheckboxes = parentNode.querySelectorAll(':scope > .children-container > .bookmark-node > .node-header > .node-checkbox');
+  if (childCheckboxes.length === 0) {
+    // 没有子项，不应是 indeterminate
+    parentCheckbox.indeterminate = false;
+    return;
+  }
+
+  let checkedCount = 0;
+  let indeterminateCount = 0;
+  childCheckboxes.forEach(cb => {
+    if (cb.checked) {
+      checkedCount++;
+    } else if (cb.indeterminate) {
+      indeterminateCount++;
     }
+  });
 
-    let checkedCount = 0;
-    let indeterminateCount = 0;
-    childCheckboxes.forEach(cb => {
-        if (cb.checked) {
-            checkedCount++;
-        } else if (cb.indeterminate) {
-            indeterminateCount++;
-        }
-    });
+  const totalCount = childCheckboxes.length;
 
-    const totalCount = childCheckboxes.length;
-
-    if (indeterminateCount > 0 || (checkedCount > 0 && checkedCount < totalCount)) {
-        // 如果有子节点是 indeterminate，或者部分子节点被选中，则父节点是 indeterminate
-        parentCheckbox.checked = false;
-        parentCheckbox.indeterminate = true;
-    } else if (checkedCount === totalCount) {
-        // 所有子节点都被选中
-        parentCheckbox.checked = true;
-        parentCheckbox.indeterminate = false;
-    } else { // checkedCount === 0 && indeterminateCount === 0
-        // 所有子节点都未被选中
-        parentCheckbox.checked = false;
-        parentCheckbox.indeterminate = false;
-    }
+  if (indeterminateCount > 0 || (checkedCount > 0 && checkedCount < totalCount)) {
+    // 如果有子节点是 indeterminate，或者部分子节点被选中，则父节点是 indeterminate
+    parentCheckbox.checked = false;
+    parentCheckbox.indeterminate = true;
+  } else if (checkedCount === totalCount) {
+    // 所有子节点都被选中
+    parentCheckbox.checked = true;
+    parentCheckbox.indeterminate = false;
+  } else { // checkedCount === 0 && indeterminateCount === 0
+    // 所有子节点都未被选中
+    parentCheckbox.checked = false;
+    parentCheckbox.indeterminate = false;
+  }
 }
 
-
+/**
+ * 导出选中的书签
+ */
 async function exportSelectedBookmarks() {
   const selectedCheckboxes = document.querySelectorAll('.node-checkbox:checked');
   if (selectedCheckboxes.length === 0) {
@@ -439,86 +492,102 @@ async function exportSelectedBookmarks() {
     // 合并选中和部分选中的节点ID
     const allRelevantIds = new Set([...selectedIds, ...indeterminateIds]);
 
-    // 优化的递归处理函数
-    function processNode(node) {
-      if (node.url) {
-        let hostname = '';
-        try {
-          hostname = new URL(node.url).hostname;
-        } catch (e) {
-          console.warn('Invalid URL:', node.url);
-        }
-        return {
-          type: 'link',
-          addDate: Number(node.dateAdded),
-          title: node.title,
-          url: node.url,
-          icon: hostname ? `https://www.google.com/s2/favicons?domain=${hostname}` : ''
-        };
-      } else if (node.children) {
-        // 使用allRelevantIds来过滤子节点，包括部分选中的节点
-        const processedChildren = node.children
-          .filter(child => selectedIds.has(child.id) || indeterminateIds.has(child.id))
-          .map(child => processNode(child))
-          .filter(Boolean);
-
-        // 如果节点本身被选中，或者是部分选中状态，或者有处理后的子节点，则保留该节点
-        if (processedChildren.length > 0 || selectedIds.has(node.id) || indeterminateIds.has(node.id)) {
-          return {
-            type: 'folder',
-            addDate: Number(node.dateAdded),
-            title: node.title,
-            children: processedChildren
-          };
-        }
-      }
-      return null;
-    }
-
     // 批量处理书签栏的直接子节点
     exportData[0].children = bookmarkBar.children
       .filter(child => selectedIds.has(child.id) || indeterminateIds.has(child.id))
-      .map(child => processNode(child))
+      .map(child => processNodeForExport(child, selectedIds, indeterminateIds))
       .filter(Boolean);
 
     // 导出为文件
-    const jsonStr = JSON.stringify(exportData, null, 2);
-    const blob = new Blob([jsonStr], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    const localDate = new Date().toLocaleDateString('zh-CN', {  //导出时间从UTC时间转换为本地时间
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit'
-    }).replace(/\//g, '-'); // 将日期格式化为 YYYY-MM-DD
-    a.download = `bookmarks⏰${localDate}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    downloadBookmarks(exportData);
   } catch (error) {
     console.error('Error exporting bookmarks:', error);
     alert(translations[currentLang].exportError);
   } finally {
-    // 计算已经过去的时间
-    const elapsedTime = Date.now() - startTime;
-    const minAnimationTime = 1000; // 最短动画时间为1秒
+    finishExport(exportButton, originalText, startTime);
+  }
+}
 
-    // 如果已经过去的时间小于最短动画时间，则延迟恢复按钮状态
-    if (elapsedTime < minAnimationTime) {
-      setTimeout(() => {
-        // 恢复按钮状态
-        exportButton.disabled = false;
-        exportButton.textContent = originalText;
-        exportButton.classList.remove('loading'); // 移除loading类，停止加载动画
-      }, minAnimationTime - elapsedTime);
-    } else {
-      // 已经超过最短动画时间，直接恢复按钮状态
+/**
+ * 处理节点用于导出
+ */
+function processNodeForExport(node, selectedIds, indeterminateIds) {
+  if (node.url) {
+    let hostname = '';
+    try {
+      hostname = new URL(node.url).hostname;
+    } catch (e) {
+      console.warn('Invalid URL:', node.url);
+    }
+    return {
+      type: 'link',
+      addDate: Number(node.dateAdded),
+      title: node.title,
+      url: node.url,
+      icon: hostname ? `https://www.google.com/s2/favicons?domain=${hostname}` : ''
+    };
+  } else if (node.children) {
+    // 使用allRelevantIds来过滤子节点，包括部分选中的节点
+    const processedChildren = node.children
+      .filter(child => selectedIds.has(child.id) || indeterminateIds.has(child.id))
+      .map(child => processNodeForExport(child, selectedIds, indeterminateIds))
+      .filter(Boolean);
+
+    // 如果节点本身被选中，或者是部分选中状态，或者有处理后的子节点，则保留该节点
+    if (processedChildren.length > 0 || selectedIds.has(node.id) || indeterminateIds.has(node.id)) {
+      return {
+        type: 'folder',
+        addDate: Number(node.dateAdded),
+        title: node.title,
+        children: processedChildren
+      };
+    }
+  }
+  return null;
+}
+
+/**
+ * 下载书签文件
+ */
+function downloadBookmarks(exportData) {
+  const jsonStr = JSON.stringify(exportData, null, 2);
+  const blob = new Blob([jsonStr], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const localDate = new Date().toLocaleDateString('zh-CN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).replace(/\//g, '-'); // 将日期格式化为 YYYY-MM-DD
+  a.download = `bookmarks⏰${localDate}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+/**
+ * 完成导出过程
+ */
+function finishExport(exportButton, originalText, startTime) {
+  // 计算已经过去的时间
+  const elapsedTime = Date.now() - startTime;
+  const minAnimationTime = 1000; // 最短动画时间为1秒
+
+  // 如果已经过去的时间小于最短动画时间，则延迟恢复按钮状态
+  if (elapsedTime < minAnimationTime) {
+    setTimeout(() => {
+      // 恢复按钮状态
       exportButton.disabled = false;
       exportButton.textContent = originalText;
       exportButton.classList.remove('loading'); // 移除loading类，停止加载动画
-    }
+    }, minAnimationTime - elapsedTime);
+  } else {
+    // 已经超过最短动画时间，直接恢复按钮状态
+    exportButton.disabled = false;
+    exportButton.textContent = originalText;
+    exportButton.classList.remove('loading'); // 移除loading类，停止加载动画
   }
 }
 
@@ -561,8 +630,9 @@ const translations = {
   }
 };
 
-let currentLang = navigator.language.startsWith('zh') ? 'zh' : 'en';
-
+/**
+ * 应用语言设置
+ */
 function applyLanguage() {
   // 使用缓存的DOM元素，避免重复查询
   domCache.title.textContent = translations[currentLang].title;
