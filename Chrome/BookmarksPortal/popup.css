@@ -149,11 +149,14 @@ h1 {
   align-items: center;
   justify-content: center;
   color: var(--md-sys-color-outline);
-  transition: transform 0.3s var(--md-motion-standard-easing);
+  transition: transform 0.3s var(--md-motion-standard-easing), color 0.3s var(--md-motion-standard-easing);
 }
 
 .toggle-btn.expanded {
   transform: rotate(90deg); /* 展开时旋转90度 */
+  color: var(--md-sys-color-primary); /* 展开时使用主色调 */
+  font-weight: bold; /* 展开时加粗 */
+  text-shadow: 0 0 1px rgba(var(--md-sys-color-primary-rgb), 0.5); /* 添加轻微文字阴影 */
 }
 
 /* 节点复选框样式 */
@@ -181,15 +184,17 @@ h1 {
 }
 
 .node-checkbox:checked::after {
-  content: ''; /* 添加选中后的标记 */
+  content: '';
   position: absolute;
-  left: 5px;
-  top: 2px;
+  left: 50%;
+  top: 45%;
+  transform: translate(-50%, -50%) rotate(45deg);
   width: 5px;
-  height: 10px;
+  height: 9px;
   border: solid white;
   border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
+  border-radius: 0 1px 1px 0;
+  transition: all 0.2s var(--md-motion-standard-easing);
 }
 
 .node-checkbox:indeterminate {
@@ -198,13 +203,15 @@ h1 {
 }
 
 .node-checkbox:indeterminate::after {
-  content: ''; /* 添加不确定状态标记 */
+  content: '';
   position: absolute;
-  left: 3px;
-  top: 7px;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
   width: 8px;
   height: 2px;
   background-color: white;
+  border-radius: 1px;
 }
 
 /* 图标样式 */
