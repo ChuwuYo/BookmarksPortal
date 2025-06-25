@@ -31,7 +31,7 @@ html {
 /* 定义字体 */
 @font-face {
   font-family: 'AlibabaHealthFont';
-  src: url('./typefaces/AlibabaHealthFont2.0CN-45R.woff2') format('woff2'); 
+  src: url('./fonts/AlibabaHealthFont2.0CN-45R.woff2') format('woff2'); 
   font-weight: normal;
   font-style: normal;
 }

@@ -33,7 +33,7 @@
   },
   "web_accessible_resources": [{
     "resources": [
-      "typefaces/*.woff2"
+      "fonts/*.woff2"
     ],
     "matches": ["<all_urls>"]
   }],
