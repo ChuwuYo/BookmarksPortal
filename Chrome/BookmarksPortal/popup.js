@@ -93,12 +93,18 @@ function loadBookmarks() {
 function handleButtonClick(event) {
   const target = event.target;
   
-  if (target.id === 'selectAll') {
-    toggleAllCheckboxes(true);
-  } else if (target.id === 'deselectAll') {
-    toggleAllCheckboxes(false);
-  } else if (target.id === 'exportButton') {
-    exportSelectedBookmarks();
+  if (!target.matches('button')) return;
+  
+  switch(target.id) {
+    case 'selectAll':
+      toggleAllCheckboxes(true);
+      break;
+    case 'deselectAll':
+      toggleAllCheckboxes(false);
+      break;
+    case 'exportButton':
+      exportSelectedBookmarks();
+      break;
   }
 }
 
@@ -107,11 +113,14 @@ function handleButtonClick(event) {
  */
 function renderBookmarkTree(nodes) {
   const container = document.getElementById('bookmarkList');
-  container.innerHTML = '';
+  const fragment = document.createDocumentFragment();
   
   nodes.forEach(node => {
-    container.appendChild(createTreeNode(node));
+    fragment.appendChild(createTreeNode(node));
   });
+  
+  container.innerHTML = '';
+  container.appendChild(fragment);
 }
 
 /**
