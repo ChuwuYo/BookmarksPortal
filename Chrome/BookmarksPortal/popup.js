@@ -66,8 +66,21 @@ function loadBookmarks() {
 
   // 获取并展示完整书签树
   chrome.bookmarks.getTree(bookmarkTree => {
-    const bookmarkBar = bookmarkTree[0].children[0];  // 书签栏节点
-    bookmarksData = bookmarkBar.children; // 缓存书签数据
+    // Chrome书签结构：
+    // bookmarkTree[0].children[0] = 书签栏/收藏夹栏
+    // bookmarkTree[0].children[1] = 其他收藏夹
+    // bookmarkTree[0].children[2] = 移动收藏夹
+    const rootChildren = bookmarkTree[0].children;
+
+    // 创建包含所有书签文件夹的数据结构
+    bookmarksData = rootChildren.map(folder => ({
+      id: folder.id,
+      title: folder.title,
+      children: folder.children || [],
+      dateAdded: folder.dateAdded,
+      isRootFolder: true // 标记为根文件夹
+    }));
+
     renderBookmarkTree(bookmarksData);
 
     // 确保加载动画至少显示 MIN_LOADING_TIME ms
@@ -92,10 +105,10 @@ function loadBookmarks() {
  */
 function handleButtonClick(event) {
   const target = event.target;
-  
+
   if (!target.matches('button')) return;
-  
-  switch(target.id) {
+
+  switch (target.id) {
     case 'selectAll':
       toggleAllCheckboxes(true);
       break;
@@ -114,11 +127,11 @@ function handleButtonClick(event) {
 function renderBookmarkTree(nodes) {
   const container = document.getElementById('bookmarkList');
   const fragment = document.createDocumentFragment();
-  
+
   nodes.forEach(node => {
     fragment.appendChild(createTreeNode(node));
   });
-  
+
   container.innerHTML = '';
   container.appendChild(fragment);
 }
@@ -476,19 +489,11 @@ async function exportSelectedBookmarks() {
   try {
     // 获取完整的书签树
     const [rootNode] = await new Promise(resolve => chrome.bookmarks.getTree(resolve));
-    const bookmarkBar = rootNode.children[0]; // 书签栏节点
+    const rootChildren = rootNode.children; // 所有根级书签文件夹
 
     // 获取浏览器界面语言，并确定要使用的语言键
     const browserUILang = chrome.i18n.getUILanguage();
     const exportLang = browserUILang && browserUILang.startsWith('zh') ? 'zh' : 'en';
-
-    // 创建导出数据的基本结构
-    const exportData = [{
-      type: 'folder',
-      addDate: Date.now(),
-      title: translations[exportLang].bookmarksBar, // 使用浏览器界面语言对应的书签栏标题
-      children: []
-    }];
 
     // 获取所有选中的节点ID和部分选中的节点ID
     const selectedCheckboxesArray = Array.from(selectedCheckboxes);
@@ -498,14 +503,33 @@ async function exportSelectedBookmarks() {
     const indeterminateCheckboxes = document.querySelectorAll('.node-checkbox:indeterminate');
     const indeterminateIds = new Set(Array.from(indeterminateCheckboxes).map(cb => cb.dataset.id));
 
-    // 合并选中和部分选中的节点ID
-    const allRelevantIds = new Set([...selectedIds, ...indeterminateIds]);
+    // 创建导出数据结构，处理所有根级文件夹
+    const exportData = [];
 
-    // 批量处理书签栏的直接子节点
-    exportData[0].children = bookmarkBar.children
-      .filter(child => selectedIds.has(child.id) || indeterminateIds.has(child.id))
-      .map(child => processNodeForExport(child, selectedIds, indeterminateIds))
-      .filter(Boolean);
+    rootChildren.forEach(rootFolder => {
+      // 检查这个根文件夹是否有被选中的内容
+      const hasSelectedContent = rootFolder.children && rootFolder.children.some(child =>
+        selectedIds.has(child.id) || indeterminateIds.has(child.id) ||
+        hasSelectedDescendants(child, selectedIds, indeterminateIds)
+      );
+
+      if (hasSelectedContent || selectedIds.has(rootFolder.id)) {
+        const processedChildren = rootFolder.children
+          .filter(child => selectedIds.has(child.id) || indeterminateIds.has(child.id) ||
+            hasSelectedDescendants(child, selectedIds, indeterminateIds))
+          .map(child => processNodeForExport(child, selectedIds, indeterminateIds))
+          .filter(Boolean);
+
+        if (processedChildren.length > 0) {
+          exportData.push({
+            type: 'folder',
+            addDate: Number(rootFolder.dateAdded),
+            title: rootFolder.title,
+            children: processedChildren
+          });
+        }
+      }
+    });
 
     // 导出为文件
     downloadBookmarks(exportData);
@@ -515,6 +539,19 @@ async function exportSelectedBookmarks() {
   } finally {
     finishExport(exportButton, originalText, startTime);
   }
+}
+
+/**
+ * 检查节点是否有被选中的后代节点
+ */
+function hasSelectedDescendants(node, selectedIds, indeterminateIds) {
+  if (!node.children) return false;
+
+  return node.children.some(child => {
+    return selectedIds.has(child.id) ||
+      indeterminateIds.has(child.id) ||
+      hasSelectedDescendants(child, selectedIds, indeterminateIds);
+  });
 }
 
 /**
@@ -536,9 +573,10 @@ function processNodeForExport(node, selectedIds, indeterminateIds) {
       icon: hostname ? `https://www.google.com/s2/favicons?domain=${hostname}` : ''
     };
   } else if (node.children) {
-    // 使用allRelevantIds来过滤子节点，包括部分选中的节点
+    // 过滤子节点，包括有被选中后代的节点
     const processedChildren = node.children
-      .filter(child => selectedIds.has(child.id) || indeterminateIds.has(child.id))
+      .filter(child => selectedIds.has(child.id) || indeterminateIds.has(child.id) ||
+        hasSelectedDescendants(child, selectedIds, indeterminateIds))
       .map(child => processNodeForExport(child, selectedIds, indeterminateIds))
       .filter(Boolean);
 
