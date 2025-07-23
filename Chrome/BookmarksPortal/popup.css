@@ -1,94 +1,85 @@
-/* Material You V3 主题优化 */
-
-/* 全局变量定义 */
 :root {
-  --md-sys-color-primary: #58505b;      /* 主色调更新 */
-  --md-sys-color-primary-rgb: 88, 80, 91; /* RGB格式的主色调，用于rgba */
-  --md-sys-color-on-primary: #fafcda;   /* 主色调上的文字颜色 */
-  --md-sys-color-surface-container: #ffffffff;  /* 恢复原透明度 */
-  --md-sys-color-outline: #79747E;      /* 轮廓颜色 */
-  --md-sys-color-outline-rgb: 121, 116, 126; /* RGB格式的轮廓颜色 */
-  --md-sys-elevation-1: none; /* 移除阴影 */
-  --md-motion-standard-easing: cubic-bezier(0.4, 0, 0.2, 1); /* 标准动画曲线 */
-  
-  /* 常用颜色和值 */
-  --text-color: #1D1B20;                 /* 文字颜色 */
-  --border-radius-small: 4px;            /* 小圆角半径 */
-  --border-radius-medium: 12px;          /* 中等圆角半径 */
-  --border-radius-large: 16px;           /* 大圆角半径 */
-  --border-radius-pill: 28px;            /* 药丸形圆角半径 */
-  --transition-standard: all 0.3s var(--md-motion-standard-easing); /* 标准过渡效果 */
+  --md-sys-color-primary: #58505b;
+  --md-sys-color-primary-rgb: 88, 80, 91;
+  --md-sys-color-on-primary: #fafcda;
+  --md-sys-color-surface-container: #ffffffff;
+  --md-sys-color-outline: #79747E;
+  --md-sys-color-outline-rgb: 121, 116, 126;
+  --md-sys-elevation-1: none;
+  --md-motion-standard-easing: cubic-bezier(0.4, 0, 0.2, 1);
+  --text-color: #1D1B20;
+  --border-radius-small: 4px;
+  --border-radius-medium: 12px;
+  --border-radius-large: 16px;
+  --border-radius-pill: 28px;
+  --transition-standard: all 0.3s var(--md-motion-standard-easing);
 }
 
 html {
   margin: 0;
   padding: 0;
-  height: 100%; /* 确保 html 填满视口 */
-  background-color: #f8fcfb; /* 背景颜色 */
-  overflow: hidden; /* 防止滚动条出现导致黑边 */
+  height: 100%;
+  background-color: #f8fcfb;
+  overflow: hidden;
 }
 
-/* 定义字体 */
 @font-face {
   font-family: 'AlibabaHealthFont';
-  src: url('./fonts/AlibabaHealthFont2.0CN-45R.woff2') format('woff2'); 
+  src: url('./fonts/AlibabaHealthFont2.0CN-45R.woff2') format('woff2');
   font-weight: normal;
   font-style: normal;
 }
 
-/* 应用字体 */
 body {
-  font-family: 'AlibabaHealthFont', system-ui, sans-serif; /* 设置字体 */
-  width: 400px; /* 增加宽度 */
-  min-height: 550px; /* 增加高度 */
+  font-family: 'AlibabaHealthFont', system-ui, sans-serif;
+  width: 400px;
+  height: auto;
+  max-height: 600px;
   margin: 0;
   padding: 12px;
-  color: #1D1B20; /* 更新文字颜色 */
-  user-select: none; /* 禁止用户选择文本 */
+  color: #1D1B20;
+  user-select: none;
   -webkit-user-select: none;
-  overflow: hidden; /* 防止内容溢出 */
-  -webkit-font-smoothing: antialiased; /* 字体平滑 */
+  overflow: auto;
+  -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #f8fcfb; /* 背景颜色 */
+  background-color: #f8fcfb;
   box-sizing: border-box;
 }
 
-/* 容器布局 */
 .container {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  height: 100%;
+  height: auto;
+  min-height: 100%;
   overflow: hidden;
   box-sizing: border-box;
-  max-width: 400px; /* 增加最大宽度 */
+  max-width: 400px;
 }
 
-/* 标题样式 */
 h1 {
   margin: 0 0 12px;
-  font-size: 22px; /* 增大字号 */
+  font-size: 22px;
   font-weight: 500;
-  color: var(--md-sys-color-primary); /* 使用主色调 */
+  color: var(--md-sys-color-primary);
   text-align: center;
   padding: 12px;
   border-radius: 28px;
-  background-color: rgba(var(--md-sys-color-primary), 0.08); /* 半透明背景 */
+  background-color: rgba(var(--md-sys-color-primary), 0.08);
 }
 
-/* 书签树样式 */
 .bookmark-tree {
-  min-height: 350px; /* 为加载前占据空间 */
-  transition: opacity 0.5s var(--md-motion-emphasized-easing), transform 0.5s var(--md-motion-emphasized-easing); /* 添加过渡效果 */
+  min-height: 420px;
+  transition: opacity 0.5s var(--md-motion-emphasized-easing), transform 0.5s var(--md-motion-emphasized-easing);
   flex-grow: 1;
   border: 1px solid #a4d1c4;
   border-radius: var(--border-radius-large);
   padding: 8px;
-  max-height: 450px; /* 增加书签树的高度 */
+  max-height: 420px;
   overflow-y: auto;
   scroll-behavior: smooth;
-  background-color: rgba(var(--md-sys-color-primary-rgb), 0.04); /* 增加背景色深度 */
-  /* 移除阴影，解决溢出问题 */
+  background-color: rgba(var(--md-sys-color-primary-rgb), 0.04);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   transform-style: flat;
@@ -99,30 +90,27 @@ h1 {
   transform: none;
 }
 
-/* 自定义滚动条 - 优化为更细圆润 */
 .bookmark-tree::-webkit-scrollbar {
-  width: 4px; /* 减小宽度，使滚动条更细 */
-  background: transparent; /* 背景透明 */
+  width: 4px;
+  background: transparent;
 }
 
 .bookmark-tree::-webkit-scrollbar-thumb {
-  background: rgba(var(--md-sys-color-outline), 0.8); /* 稍微加深颜色，便于识别 */
-  border-radius: 10px; /* 增加圆润度 */
-  border: 1px solid transparent; /* 添加边界，避免边缘冲突 */
-  background-clip: padding-box; /* 确保圆角内填充 */
+  background: rgba(var(--md-sys-color-outline), 0.8);
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background-clip: padding-box;
 }
 
 .bookmark-tree::-webkit-scrollbar-track {
-  background: transparent; /* 确保轨道透明 */
-  border-radius: 10px; /* 圆润轨道 */
+  background: transparent;
+  border-radius: 10px;
 }
 
-/* 书签节点样式 */
 .bookmark-node {
   margin: 4px 0;
 }
 
-/* 节点头部样式 */
 .node-header {
   display: flex;
   align-items: center;
@@ -135,14 +123,13 @@ h1 {
 }
 
 .node-header:hover {
-  background: rgba(var(--md-sys-color-primary-rgb), 0.08); /* 悬停时背景变色 */
-  transform: translateY(-1px); /* 轻微上移效果 */
+  background: rgba(var(--md-sys-color-primary-rgb), 0.08);
+  transform: translateY(-1px);
 }
 
-/* 切换按钮样式 */
 .toggle-btn {
   cursor: pointer;
-  width: 24px; /* 增大点击区域 */
+  width: 24px;
   height: 24px;
   border-radius: 20px;
   display: flex;
@@ -153,22 +140,21 @@ h1 {
 }
 
 .toggle-btn.expanded {
-  transform: rotate(90deg); /* 展开时旋转90度 */
-  color: var(--md-sys-color-primary); /* 展开时使用主色调 */
-  font-weight: bold; /* 展开时加粗 */
-  text-shadow: 0 0 1px rgba(var(--md-sys-color-primary-rgb), 0.5); /* 添加轻微文字阴影 */
+  transform: rotate(90deg);
+  color: var(--md-sys-color-primary);
+  font-weight: bold;
+  text-shadow: 0 0 1px rgba(var(--md-sys-color-primary-rgb), 0.5);
 }
 
-/* 节点复选框样式 */
 .node-checkbox {
-  accent-color: var(--md-sys-color-primary); /* 主色调作为选中色 */
+  accent-color: var(--md-sys-color-primary);
   width: 18px;
   height: 18px;
-  min-width: 18px;  /* 添加最小宽度 */
-  min-height: 18px; /* 添加最小高度 */
-  margin: 0;        /* 重置外边距 */
-  padding: 0;       /* 重置内边距 */
-  appearance: none; /* 移除默认样式 */
+  min-width: 18px;
+  min-height: 18px;
+  margin: 0;
+  padding: 0;
+  appearance: none;
   -webkit-appearance: none;
   border: 2px solid var(--md-sys-color-outline);
   border-radius: 5px;
@@ -214,16 +200,14 @@ h1 {
   border-radius: 1px;
 }
 
-/* 图标样式 */
 .folder-icon {
-  color: var(--md-sys-color-primary); /* 使用主色调 */
+  color: var(--md-sys-color-primary);
 }
 
 .link-icon {
-  color: #4CAF50; /* 辅助颜色 */
+  color: #4CAF50;
 }
 
-/* 节点标题样式 */
 .node-title {
   font-size: 14px;
   font-weight: 400;
@@ -233,22 +217,20 @@ h1 {
   color: #1D1B20;
 }
 
-/* 控制区域样式 */
 .controls {
-  transition: opacity 0.5s var(--md-motion-emphasized-easing), transform 0.5s var(--md-motion-emphasized-easing); /* 添加过渡效果 */
-  padding-top: 12px;
+  transition: opacity 0.5s var(--md-motion-emphasized-easing), transform 0.5s var(--md-motion-emphasized-easing);
+  padding-top: 8px;
   width: 100%;
+  flex-shrink: 0;
 }
 
-/* 按钮组样式 */
 .button-group {
   display: flex;
-  gap: 24px; /* 增加间距 */
+  gap: 24px;
   justify-content: center;
   width: 100%;
 }
 
-/* 按钮样式 */
 .button-group button {
   width: 90px;
   min-width: 90px;
@@ -262,35 +244,33 @@ h1 {
   font-weight: 500;
   transition: all 0.3s var(--md-motion-standard-easing);
   position: relative;
-  z-index: 9999; /* 确保按钮在最上层 */
+  z-index: 9999;
   overflow: hidden;
   text-align: center;
   flex: none;
 }
 
-/* 按钮基础样式和效果 */
 button::after {
-  content: ''; /* 添加按钮点击效果 */
+  content: '';
   position: absolute;
   width: 100%;
   height: 100%;
   left: 0;
   top: 0;
-  background: rgba(255,255,255,0.2);
+  background: rgba(255, 255, 255, 0.2);
   opacity: 0;
   transition: opacity 0.3s var(--md-motion-standard-easing);
 }
 
 button:hover::after {
-  opacity: 1; /* 悬停时显示效果 */
+  opacity: 1;
 }
 
 button:focus {
   outline: none;
-  box-shadow: none; /* 移除阴影 */
+  box-shadow: none;
 }
 
-/* 搜索输入框样式 */
 .search-input {
   width: 100%;
   padding: 14px 16px;
@@ -304,17 +284,15 @@ button:focus {
 
 .search-input:focus {
   border-color: var(--md-sys-color-primary);
-  box-shadow: none; /* 移除阴影 */
+  box-shadow: none;
 }
 
-/* 头部按钮共享样式 */
 .header-controls {
   position: relative;
   width: 100%;
-  text-align: center; /* 居中标题 */
+  text-align: center;
 }
 
-/* 语言切换按钮和加载选项按钮共享样式 */
 #languageToggle,
 #loadOptionsButton {
   font-family: 'AlibabaHealthFont', system-ui, sans-serif;
@@ -335,15 +313,13 @@ button:focus {
   width: 32px;
   height: 32px;
   margin: 0;
-  z-index: 9999; /* 确保按钮在最上层 */
+  z-index: 9999;
 }
 
-/* 语言切换按钮位置 */
 #languageToggle {
   right: 10px;
 }
 
-/* 加载选项按钮位置 */
 #loadOptionsButton {
   left: 10px;
 }
@@ -369,16 +345,19 @@ button:focus {
   transform: translateY(1px);
 }
 
-/* 加载动画优化 */
 @keyframes spin {
-  from { transform: translate(-50%, -50%) rotate(0deg); }
-  to { transform: translate(-50%, -50%) rotate(360deg); }
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
 }
 
-/* 全局加载动画 for .container.loading */
 .container.loading {
-  position: relative; /* Needed for absolute positioning of ::before */
-  min-height: 300px; /* Ensure container has some height for spinner to be visible */
+  position: relative;
+  min-height: 300px;
 }
 
 .container.loading::before {
@@ -390,13 +369,12 @@ button:focus {
   top: 50%;
   transform: translate(-50%, -50%);
   border-radius: 50%;
-  border: 4px solid rgba(0,0,0,0.1); /* Light track for the spinner */
-  border-top-color: #58505b; /* Spinner color, matches theme-color from HTML or use var(--md-sys-color-primary) if defined */
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-top-color: #58505b;
   animation: spin 1s linear infinite;
   z-index: 10;
 }
 
-/* Hide spinner when not loading */
 .container:not(.loading)::before {
   content: none;
   animation: none;
@@ -410,12 +388,11 @@ button.loading::after {
   height: 100%;
   left: 0;
   top: 0;
-  background: rgba(255,255,255,0.2);
+  background: rgba(255, 255, 255, 0.2);
   opacity: 1;
   transition: opacity 0.3s var(--md-motion-standard-easing);
 }
 
-/* 为加载中按钮添加加载指示器 */
 button.loading::before {
   content: '';
   position: absolute;
@@ -432,7 +409,6 @@ button.loading::before {
   z-index: 1;
 }
 
-/* 确保加载动画停止 */
 button:not(.loading)::before {
   content: none;
   animation: none;
@@ -443,17 +419,18 @@ button:not(.loading)::after {
 }
 
 button:not(.loading):hover::after {
-  opacity: 1; /* 确保非loading状态下悬停效果正常显示 */
+  opacity: 1;
 }
 
-/* 加载时元素初始状态 */
 .container.loading .bookmark-tree,
 .container.loading .controls {
   opacity: 0;
   transform: translateY(20px);
 }
 
-/* 其他应用字体的元素 */
-h1, .node-title, .search-input, button {
-  font-family: 'AlibabaHealthFont', 'Roboto', system-ui, sans-serif; /* 应用字体 */
+h1,
+.node-title,
+.search-input,
+button {
+  font-family: 'AlibabaHealthFont', 'Roboto', system-ui, sans-serif;
 }
