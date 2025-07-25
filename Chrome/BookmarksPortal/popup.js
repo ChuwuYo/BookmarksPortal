@@ -523,7 +523,7 @@ async function exportSelectedBookmarks() {
         if (processedChildren.length > 0) {
           exportData.push({
             type: 'folder',
-            addDate: Number(rootFolder.dateAdded),
+            addDate: Date.now(),
             title: rootFolder.title,
             children: processedChildren
           });
