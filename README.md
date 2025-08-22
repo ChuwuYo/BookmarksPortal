@@ -26,6 +26,6 @@
 ## 界面预览
 
 <div style="display: flex; justify-content: space-between; margin-top: 20px;">
-    <img src="https://github.com/user-attachments/assets/2543d8d3-c9bd-4770-9a04-2c252a80bae6" alt="英文界面" style="width: 48%;" />
-    <img src="https://github.com/user-attachments/assets/3c2bc3c5-9b75-4fd1-a2dc-dbe00a912a53" alt="中文界面" style="width: 48%;" />
+    <img src="images/en.png" alt="英文界面" style="width: 48%; height: auto; object-fit: cover;" />
+    <img src="images/zh.png" alt="中文界面" style="width: 48%; height: auto; object-fit: cover;" />
 </div>
