@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,17 +15,17 @@
   <link rel="preload" href="./fonts/AlibabaHealthFont2.0CN-45R.woff2" as="font" type="font/woff2" crossorigin>
 </head>
 <body>
-  <div class="container loading">
+  <div class="container loading" role="main">
     <div class="header-controls">
-      <button id="loadOptionsButton" type="button" aria-label="Load last options" class="secondary">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-history">
+      <button id="loadOptionsButton" type="button" aria-label="Load last options" title="Load last options" class="secondary">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-history" role="img" aria-label="Load last options">
           <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
           <path d="M3 3v5h5"/>
         </svg>
       </button>
       <h1 id="title">选择要导出的书签</h1>
-      <button id="languageToggle" type="button" aria-label="Switch language" class="secondary">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-languages">
+      <button id="languageToggle" type="button" aria-label="Switch language" title="Switch language" class="secondary">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-languages" role="img" aria-label="Switch language">
           <path d="m5 8 6 6"></path>
           <path d="m4 14 6-6 2-3"></path>
           <path d="M2 5h12"></path>
@@ -35,12 +35,12 @@
         </svg>
       </button>
     </div>
-    <div id="bookmarkList" class="bookmark-tree" role="tree"></div>
+    <div id="bookmarkList" class="bookmark-tree" role="tree" aria-label="Bookmark tree"></div>
     <div class="controls">
       <div class="button-group">
-        <button id="selectAll" class="secondary" type="button">选中所有</button>
-        <button id="deselectAll" class="secondary" type="button">取消全选</button>
-        <button id="exportButton" class="primary" type="button">导出书签</button>
+        <button id="selectAll" class="secondary" type="button" aria-label="Select all bookmarks" title="Select all bookmarks">选中所有</button>
+        <button id="deselectAll" class="secondary" type="button" aria-label="Deselect all bookmarks" title="Deselect all bookmarks">取消全选</button>
+        <button id="exportButton" class="primary" type="button" aria-label="Export selected bookmarks" title="Export selected bookmarks">导出书签</button>
       </div>
     </div>
   </div>
