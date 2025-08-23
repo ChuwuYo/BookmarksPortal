@@ -488,8 +488,8 @@ async function exportSelectedBookmarks() {
 
   try {
     // 获取完整的书签树
-    const [rootNode] = await new Promise(resolve => chrome.bookmarks.getTree(resolve));
-    const rootChildren = rootNode.children; // 所有根级书签文件夹
+    const bookmarkTree = await chrome.bookmarks.getTree();
+    const rootChildren = bookmarkTree[0].children; // 所有根级书签文件夹
 
     // 获取浏览器界面语言，并确定要使用的语言键
     const browserUILang = chrome.i18n.getUILanguage();
@@ -506,7 +506,7 @@ async function exportSelectedBookmarks() {
     // 创建导出数据结构，处理所有根级文件夹
     const exportData = [];
 
-    rootChildren.forEach(rootFolder => {
+    for (const rootFolder of rootChildren) {
       // 检查这个根文件夹是否有被选中的内容
       const hasSelectedContent = rootFolder.children && rootFolder.children.some(child =>
         selectedIds.has(child.id) || indeterminateIds.has(child.id) ||
@@ -529,7 +529,7 @@ async function exportSelectedBookmarks() {
           });
         }
       }
-    });
+    }
 
     // 导出为文件
     downloadBookmarks(exportData);
@@ -547,6 +547,7 @@ async function exportSelectedBookmarks() {
 function hasSelectedDescendants(node, selectedIds, indeterminateIds) {
   if (!node.children) return false;
 
+  // 使用some可以提前终止循环，提高性能
   return node.children.some(child => {
     return selectedIds.has(child.id) ||
       indeterminateIds.has(child.id) ||
@@ -597,21 +598,29 @@ function processNodeForExport(node, selectedIds, indeterminateIds) {
  * 下载书签文件
  */
 function downloadBookmarks(exportData) {
-  const jsonStr = JSON.stringify(exportData, null, 2);
-  const blob = new Blob([jsonStr], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  const localDate = new Date().toLocaleDateString('zh-CN', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit'
-  }).replace(/\//g, '-'); // 将日期格式化为 YYYY-MM-DD
-  a.download = `bookmarks⏰${localDate}.json`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  try {
+    const jsonStr = JSON.stringify(exportData, null, 2);
+    const blob = new Blob([jsonStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const localDate = new Date().toLocaleDateString('zh-CN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    }).replace(/\//g, '-'); // 将日期格式化为 YYYY-MM-DD
+    a.download = `bookmarks⏰${localDate}.json`;
+    document.body.appendChild(a);
+    a.click();
+    // 延迟清理以确保下载开始
+    setTimeout(() => {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 100);
+  } catch (error) {
+    console.error('Error creating download link:', error);
+    alert(translations[currentLang].exportError);
+  }
 }
 
 /**
