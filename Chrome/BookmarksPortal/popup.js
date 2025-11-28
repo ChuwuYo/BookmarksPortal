@@ -595,24 +595,123 @@ function processNodeForExport(node, selectedIds, indeterminateIds) {
 }
 
 /**
- * 下载书签文件
+ * 生成目录结构（仅包含文件夹信息，用于快速加载侧边栏）
+ * @param {Array} nodes - 书签节点数组
+ * @param {string} parentPath - 父路径，用于生成唯一ID
+ * @returns {Array} 目录结构数组
+ */
+function generateStructure(nodes, parentPath = '') {
+  const structure = [];
+  
+  nodes.forEach((node, index) => {
+    if (node.type === 'folder') {
+      // 为每个文件夹生成唯一的路径ID
+      const pathId = parentPath ? `${parentPath}_${index}` : `${index}`;
+      
+      // 计算文件夹内的链接数量（仅直接子级）
+      const linkCount = node.children ? node.children.filter(c => c.type === 'link').length : 0;
+      // 计算子文件夹数量
+      const folderCount = node.children ? node.children.filter(c => c.type === 'folder').length : 0;
+      
+      const folderInfo = {
+        id: pathId,
+        title: node.title,
+        addDate: node.addDate,
+        linkCount: linkCount,
+        folderCount: folderCount,
+        hasChildren: !!(node.children && node.children.length > 0)
+      };
+      
+      // 递归处理子文件夹
+      if (node.children) {
+        const childFolders = node.children.filter(c => c.type === 'folder');
+        if (childFolders.length > 0) {
+          folderInfo.children = generateStructure(node.children, pathId);
+        }
+      }
+      
+      structure.push(folderInfo);
+    }
+  });
+  
+  return structure;
+}
+
+/**
+ * 生成每个文件夹的完整数据（包含链接和子文件夹的完整信息）
+ * @param {Array} nodes - 书签节点数组
+ * @param {string} parentPath - 父路径
+ * @returns {Object} 文件夹ID到数据的映射
+ */
+function generateFolderData(nodes, parentPath = '') {
+  const folderDataMap = {};
+  
+  nodes.forEach((node, index) => {
+    if (node.type === 'folder') {
+      const pathId = parentPath ? `${parentPath}_${index}` : `${index}`;
+      
+      // 保存当前文件夹的完整数据
+      folderDataMap[pathId] = {
+        id: pathId,
+        title: node.title,
+        addDate: node.addDate,
+        children: node.children || []
+      };
+      
+      // 递归处理子文件夹
+      if (node.children) {
+        const childFolders = node.children.filter(c => c.type === 'folder');
+        childFolders.forEach((child, childIndex) => {
+          const childMaps = generateFolderData([child], pathId);
+          Object.assign(folderDataMap, childMaps);
+        });
+      }
+    }
+  });
+  
+  return folderDataMap;
+}
+
+/**
+ * 下载书签文件（下载两个JSON文件：完整数据 + 目录结构）
+ * @param {Array} exportData - 导出的书签数据
  */
 function downloadBookmarks(exportData) {
+  const localDate = new Date().toLocaleDateString('zh-CN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).replace(/\//g, '-');
+  
+  // 1. 下载完整的书签数据文件
+  downloadJsonFile(exportData, `bookmarks⏰${localDate}.json`);
+  
+  // 2. 生成并下载目录结构文件（固定名称，延迟一点避免浏览器阻止多个下载）
+  setTimeout(() => {
+    const structure = {
+      version: 1,
+      generated: new Date().toISOString(),
+      folders: generateStructure(exportData)
+    };
+    downloadJsonFile(structure, 'structure.json');
+  }, 500);
+}
+
+/**
+ * 下载单个JSON文件
+ * @param {Object|Array} data - 要下载的数据
+ * @param {string} filename - 文件名
+ */
+function downloadJsonFile(data, filename) {
   try {
-    const jsonStr = JSON.stringify(exportData, null, 2);
+    const jsonStr = JSON.stringify(data, null, 2);
     const blob = new Blob([jsonStr], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    const localDate = new Date().toLocaleDateString('zh-CN', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit'
-    }).replace(/\//g, '-'); // 将日期格式化为 YYYY-MM-DD
-    a.download = `bookmarks⏰${localDate}.json`;
+    a.download = filename;
     document.body.appendChild(a);
     a.click();
-    // 延迟清理以确保下载开始
     setTimeout(() => {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
