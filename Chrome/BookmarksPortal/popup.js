@@ -571,7 +571,10 @@ function processNodeForExport(node, selectedIds, indeterminateIds) {
       addDate: Number(node.dateAdded),
       title: node.title,
       url: node.url,
-      icon: hostname ? `https://www.google.com/s2/favicons?domain=${hostname}` : ''
+      icon: hostname ? [
+        `https://www.google.com/s2/favicons?domain=${hostname}`,
+        `https://favicon.im/${hostname}`
+      ] : []
     };
   } else if (node.children) {
     // 过滤子节点，包括有被选中后代的节点
