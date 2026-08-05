@@ -11,9 +11,17 @@
  *   路径 id 的索引基于「全部兄弟节点（含链接）」中的位置，与历史版本保持一致。
  */
 
+/**
+ * 图标候选源（有序）。
+ * 解析型服务在前（服务端会解析站点真实图标路径，命中率最高），
+ * 站点约定路径 /favicon.ico 垫底（仅覆盖遵循约定的站点，404 即快速回退）。
+ * 消费端 ChuwuBookmarks 会把 favicon.im 自动提到最前（其网络可达性最好）。
+ */
 const FAVICON_PROVIDERS = [
   (hostname) => `https://www.google.com/s2/favicons?domain=${hostname}`,
   (hostname) => `https://favicon.im/${hostname}`,
+  (hostname) => `https://icons.duckduckgo.com/ip3/${hostname}.ico`,
+  (hostname) => `https://${hostname}/favicon.ico`,
 ];
 
 /**
