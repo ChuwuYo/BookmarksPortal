@@ -104,11 +104,14 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git tag -fa latest -m "Rolling latest build"
           git push -f origin latest
-          gh release delete latest --yes 2>/dev/null || true
-          gh release create latest \
-            --prerelease \
-            --title "Latest (continuous)" \
-            --notes "自动构建的最新扩展包（滚动测试渠道，与正式版 Release 互不冲突）。提交：$GITHUB_SHA" \
+          # 保留已有 Release，仅覆盖资产；不存在时才创建（避免删除-重建空窗）
+          if ! gh release view latest >/dev/null 2>&1; then
+            gh release create latest \
+              --prerelease \
+              --title "Latest (continuous)" \
+              --notes "自动构建的最新扩展包（滚动测试渠道，与正式版 Release 互不冲突）。提交：$GITHUB_SHA"
+          fi
+          gh release upload latest --clobber \
             release/BookmarksPortal-chrome-latest.zip \
             release/BookmarksPortal-firefox-latest.zip \
             release/SHA256SUMS.txt
@@ -145,8 +148,11 @@ jobs:
           git fetch --force origin "refs/tags/$GITHUB_REF_NAME:refs/tags/$GITHUB_REF_NAME"
           current="$(git rev-list -n 1 "$GITHUB_REF_NAME")"
           test "$current" = "$GITHUB_SHA" || { echo "::error::tag $GITHUB_REF_NAME 已移动，拒绝用旧提交发布。"; exit 1; }
-          gh release create "$GITHUB_REF_NAME" \
-            --generate-notes \
+          # 已有同名 Release（重跑/重复触发）时仅覆盖资产，否则创建
+          if ! gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release create "$GITHUB_REF_NAME" --generate-notes
+          fi
+          gh release upload "$GITHUB_REF_NAME" --clobber \
             BookmarksPortal-chrome.zip \
             BookmarksPortal-firefox.zip \
             SHA256SUMS.txt
