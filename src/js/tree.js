@@ -91,6 +91,14 @@ function createBookmarkTree(nodes, { t, onSelectionChange }) {
   let filterActive = false;
 
   /**
+   * 是否为分隔符节点（Firefox 特有：无 url 且无 children）。
+   * 分隔符不可导出，也不应渲染为幻影行。
+   */
+  function isSeparator(data) {
+    return !data.url && !Array.isArray(data.children);
+  }
+
+  /**
    * 递归构建节点（视图模型 + DOM）。
    */
   function buildNode(data, parent, depth) {
@@ -189,10 +197,11 @@ function createBookmarkTree(nodes, { t, onSelectionChange }) {
       onSelectionChange();
     });
 
-    // 递归构建子节点
+    // 递归构建子节点（跳过分隔符）
     if (isFolder) {
       const fragment = document.createDocumentFragment();
       for (const child of data.children) {
+        if (isSeparator(child)) continue;
         const childModel = buildNode(child, model, depth + 1);
         model.children.push(childModel);
         fragment.appendChild(childModel.itemEl);
@@ -206,6 +215,7 @@ function createBookmarkTree(nodes, { t, onSelectionChange }) {
   const rootModels = [];
   const fragment = document.createDocumentFragment();
   for (const node of nodes) {
+    if (isSeparator(node)) continue;
     const model = buildNode(node, null, 0);
     rootModels.push(model);
     fragment.appendChild(model.itemEl);

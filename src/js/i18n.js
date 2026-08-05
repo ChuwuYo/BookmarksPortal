@@ -74,13 +74,6 @@ function detectLanguage() {
 let currentLang = detectLanguage();
 
 /**
- * 获取当前语言。
- */
-function getLanguage() {
-  return currentLang;
-}
-
-/**
  * 获取翻译文本。
  * @param {string} key
  * @returns {*}
@@ -127,4 +120,4 @@ function applyStaticTexts(doc) {
   });
 }
 
-export { applyStaticTexts, getLanguage, t, toggleLanguage, translations };
+export { applyStaticTexts, t, toggleLanguage, translations };

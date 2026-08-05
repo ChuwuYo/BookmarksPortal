@@ -160,7 +160,7 @@ function hideStatus() {
  */
 async function exportSelectedBookmarks() {
   if (!tree) {
-    showStatus("noSelection");
+    showStatus("noBookmarks");
     return;
   }
 
@@ -244,7 +244,7 @@ function saveCheckedOptions() {
  */
 function loadCheckedOptions() {
   if (!tree) {
-    showStatus("noSavedOptions");
+    showStatus("noBookmarks");
     return;
   }
 

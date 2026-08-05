@@ -162,6 +162,24 @@ describe("createBookmarkTree", () => {
     assert.equal(test20.hidden, false);
   });
 
+  it("Firefox 分隔符节点不渲染、不计数", () => {
+    const data = [
+      {
+        id: "1",
+        title: "书签栏",
+        children: [
+          { id: "10", title: "A", url: "https://a.com/" },
+          { id: "sep1", type: "separator" }, // 无 url 无 children
+          { id: "11", title: "B", url: "https://b.com/" },
+        ],
+      },
+    ];
+    const tree = createBookmarkTree(data, { t, onSelectionChange: () => {} });
+    assert.equal(tree.element.querySelectorAll(".node-checkbox").length, 3); // 1 文件夹 + 2 链接
+    tree.setAllChecked(true);
+    assert.equal(tree.getCheckedCounts().links, 2);
+  });
+
   it("勾选变化触发 onSelectionChange 回调", () => {
     const { tree, getChangeCount } = makeTree();
     const before = getChangeCount();

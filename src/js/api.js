@@ -1,10 +1,8 @@
 /**
  * 跨浏览器扩展 API 适配层。
  * Firefox 提供 Promise 风格的 browser.*，Chrome 提供回调风格的 chrome.*。
- * 统一封装为 Promise。
+ * 统一封装为 Promise。模块保持 Node 可导入（无顶层浏览器全局引用）。
  */
-
-const api = typeof browser !== "undefined" ? browser : chrome;
 
 /**
  * 获取完整书签树。
@@ -26,4 +24,4 @@ function getBookmarkTree() {
   });
 }
 
-export { api, getBookmarkTree };
+export { getBookmarkTree };

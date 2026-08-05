@@ -97,6 +97,8 @@ jobs:
           test "$current" = "$GITHUB_SHA" || { echo "::error::$GITHUB_REF_NAME 已前进，拒绝用旧提交发布。"; exit 1; }
           mv BookmarksPortal-chrome.zip BookmarksPortal-chrome-latest.zip
           mv BookmarksPortal-firefox.zip BookmarksPortal-firefox-latest.zip
+          # 重命名后重新生成校验文件，保持名称与摘要一致
+          sha256sum BookmarksPortal-chrome-latest.zip BookmarksPortal-firefox-latest.zip > SHA256SUMS.txt
       - name: Move latest tag to HEAD
         run: |
           git config user.name "github-actions[bot]"
@@ -114,6 +116,7 @@ jobs:
           files: |
             release/BookmarksPortal-chrome-latest.zip
             release/BookmarksPortal-firefox-latest.zip
+            release/SHA256SUMS.txt
 
   release:
     name: Publish tagged release

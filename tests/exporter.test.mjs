@@ -10,7 +10,7 @@
 
 import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { describe, it } from "node:test";
 import { fileURLToPath } from "node:url";
 
@@ -208,7 +208,7 @@ describe("generateStructure", () => {
     assert.equal(folder.hasChildren, false);
   });
 
-  it("structure 条目字段集合与顺序契约", () => {
+  it("structure 条目字段集合契约（键名无关顺序）", () => {
     const exportData = [
       {
         type: "folder",
@@ -218,14 +218,14 @@ describe("generateStructure", () => {
       },
     ];
     const [folder] = generateStructure(exportData);
-    assert.deepEqual(Object.keys(folder), [
-      "id",
-      "title",
+    assert.deepEqual(Object.keys(folder).sort(), [
       "addDate",
-      "linkCount",
+      "children",
       "folderCount",
       "hasChildren",
-      "children",
+      "id",
+      "linkCount",
+      "title",
     ]);
   });
 });
@@ -253,6 +253,42 @@ describe("normalizeAddDate", () => {
   it("非法值回退", () => {
     assert.equal(normalizeAddDate(undefined, NOW), NOW);
     assert.equal(normalizeAddDate(NaN, NOW), NOW);
+  });
+});
+
+/**
+ * 黄金快照回测（CI 必跑）：vendor 进仓库的合成夹具，
+ * 锁定「含链接的全部兄弟节点索引」的 id 路径算法与 structure 形状。
+ * 夹具为全合成数据（example.com），但保留关键鉴别结构：
+ * 文件夹前面存在链接兄弟，使「全兄弟索引」与「仅文件夹索引」产生不同输出。
+ */
+describe("黄金快照回测", () => {
+  const fixture = JSON.parse(
+    readFileSync(join(dirname(fileURLToPath(import.meta.url)), "fixtures/golden.json"), "utf8")
+  );
+
+  it("嵌套混合结构重算的 structure 与快照完全一致", () => {
+    const result = generateStructure(fixture.bookmarks);
+    assert.equal(result.length, 1);
+    assert.equal(result[0].id, "0");
+    assert.deepEqual(result[0].children, fixture.structureChildren);
+
+    // 根条目计数与快照数据自洽
+    const children = fixture.bookmarks[0].children;
+    assert.equal(result[0].linkCount, children.filter((c) => c.type === "link").length);
+    assert.equal(result[0].folderCount, children.filter((c) => c.type === "folder").length);
+    assert.equal(result[0].hasChildren, children.length > 0);
+  });
+
+  it("链接兄弟使文件夹索引偏移（鉴别两种索引算法）", () => {
+    // 夹具：「偏移演示父夹」的 6 个子项中，文件夹「被偏移的文件夹」
+    // 前面有 3 个链接，其全兄弟索引 id 为 0_3；末尾夹为 0_5。
+    // 若算法退化为仅文件夹索引，二者将变为 0_0 / 0_1——此用例专杀该回归。
+    const result = generateStructure(fixture.shiftedCase.bookmarks);
+    assert.deepEqual(result, fixture.shiftedCase.structure);
+
+    const shifted = result[0].children.find((c) => c.title === "被偏移的文件夹");
+    assert.equal(shifted.id, "0_3");
   });
 });
 
