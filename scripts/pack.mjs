@@ -29,21 +29,26 @@ const ARTIFACTS_DIR = join(DIST_DIR, "artifacts");
 
 /**
  * 以纯 Node 方式将目录打包为 zip（manifest.json 位于顶层）。
+ * 条目按路径排序并固定 mtime/mode，保证相同源码产出字节一致的 zip（可复现构建）。
  * @param {string} srcDir
  * @param {string} outPath
  */
 function zipDirectory(srcDir, outPath) {
   const zip = new ZipFile();
+  // DOS 纪元：zip 可表示的最早时间，固定后产物与构建时间无关
+  const FIXED_MTIME = new Date("1980-01-01T00:00:00Z");
 
   const walk = (dir, prefix) => {
-    for (const entry of readdirSync(dir, { withFileTypes: true })) {
-      if (entry.name.startsWith(".")) continue;
+    const entries = readdirSync(dir, { withFileTypes: true })
+      .filter((entry) => !entry.name.startsWith("."))
+      .sort((a, b) => a.name.localeCompare(b.name, "en"));
+    for (const entry of entries) {
       const fullPath = join(dir, entry.name);
       const zipPath = prefix ? `${prefix}/${entry.name}` : entry.name;
       if (entry.isDirectory()) {
         walk(fullPath, zipPath);
       } else {
-        zip.addFile(fullPath, zipPath);
+        zip.addFile(fullPath, zipPath, { mtime: FIXED_MTIME, mode: 0o100644 });
       }
     }
   };
@@ -53,6 +58,7 @@ function zipDirectory(srcDir, outPath) {
     const output = createWriteStream(outPath);
     output.on("close", resolve);
     output.on("error", reject);
+    zip.on("error", reject);
     zip.outputStream.on("error", reject);
     zip.outputStream.pipe(output);
     zip.end();
