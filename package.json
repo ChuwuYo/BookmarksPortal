@@ -12,6 +12,7 @@
     "build:chrome": "node build.mjs chrome",
     "build:firefox": "node build.mjs firefox",
     "pack": "node scripts/pack.mjs",
+    "subset:font": "node scripts/subset-font.mjs",
     "test": "node --test \"tests/**/*.test.mjs\"",
     "format": "prettier --write \"src/**/*.{js,css,html}\" \"manifests/*.json\" \"tests/**/*.mjs\" \"scripts/*.mjs\" build.mjs",
     "format:check": "prettier --check \"src/**/*.{js,css,html}\" \"manifests/*.json\" \"tests/**/*.mjs\" \"scripts/*.mjs\" build.mjs",
@@ -24,6 +25,7 @@
     "eslint": "^9.0.0",
     "jsdom": "^30.0.1",
     "prettier": "^3.0.0",
+    "subset-font": "^2.5.0",
     "web-ext": "^8.0.0"
   }
 }

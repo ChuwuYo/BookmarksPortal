@@ -69,10 +69,10 @@ for (const [name, manifest] of [
 check(typeof firefox.browser_specific_settings?.gecko?.id === "string", "firefox: 缺少 gecko id");
 check(!("browser_specific_settings" in chrome), "chrome: 不应包含 browser_specific_settings");
 
-// popup.html 引用的字体必须存在
+// 完整字体源文件必须存在（构建期子集化生成 dist/fonts/ui-subset.woff2）
 check(
-  existsSync(join(ROOT, "src/fonts/AlibabaHealthFont2.0CN-45R.woff2")),
-  "字体文件缺失: src/fonts/AlibabaHealthFont2.0CN-45R.woff2"
+  existsSync(join(ROOT, "font-source/AlibabaHealthFont2.0CN-45R.woff2")),
+  "字体源文件缺失: font-source/AlibabaHealthFont2.0CN-45R.woff2"
 );
 
 if (errors.length > 0) {
