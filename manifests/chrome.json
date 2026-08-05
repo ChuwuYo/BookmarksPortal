@@ -1,11 +1,11 @@
 {
   "manifest_version": 3,
   "name": "书签传送门-BookmarksPortal",
+  "homepage_url": "https://github.com/ChuwuYo/BookmarksPortal",
+  "author": "ChuwuYo",
   "description": "导出选定的书签为规整的JSON格式文件（传送!!） - Export the selected bookmarks as a structured JSON file (Transmit!!)",
-  "version": "3.0.0",
-  "permissions": [
-    "bookmarks"
-  ],
+  "version": "5.0.0",
+  "permissions": ["bookmarks"],
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
@@ -21,10 +21,5 @@
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   },
-  "browser_specific_settings": {
-    "gecko": {
-      "id": "s1805948721@gmail.com",
-      "strict_min_version": "109.0"
-    }
-  }
+  "minimum_chrome_version": "88"
 }

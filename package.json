@@ -1,0 +1,24 @@
+{
+  "name": "bookmarks-portal",
+  "version": "5.0.0",
+  "private": true,
+  "type": "module",
+  "description": "导出选定的书签为规整的JSON格式文件（ChuwuBookmarks 配套浏览器扩展）",
+  "scripts": {
+    "build": "node build.mjs",
+    "build:chrome": "node build.mjs chrome",
+    "build:firefox": "node build.mjs firefox",
+    "pack:firefox": "npm run build:firefox && web-ext build --source-dir dist/firefox --artifacts-dir dist/artifacts --overwrite-dest --filename bookmarks-portal-firefox.xpi",
+    "test": "node --test \"tests/**/*.test.mjs\"",
+    "format": "prettier --write \"src/**/*.{js,css,html}\" \"manifests/*.json\" \"tests/**/*.mjs\" build.mjs",
+    "format:check": "prettier --check \"src/**/*.{js,css,html}\" \"manifests/*.json\" \"tests/**/*.mjs\" build.mjs",
+    "lint": "eslint src/ tests/ build.mjs"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.0.0",
+    "eslint": "^9.0.0",
+    "jsdom": "^30.0.1",
+    "prettier": "^3.0.0",
+    "web-ext": "^8.0.0"
+  }
+}

@@ -18,10 +18,11 @@
 
 ## 特性
 
-- 将浏览器书签导出为JSON文件
-- 多语言界面支持
-- 支持Chrome和Firefox浏览器
-- 轻量且快速
+- 将浏览器书签导出为JSON文件（同时生成配套的 structure.json 目录结构文件）
+- 中英文界面切换，选择持久化
+- 书签树搜索过滤、三态勾选联动、记住上次选择
+- 支持Chrome和Firefox浏览器（单一源码构建）
+- 暗色模式适配，轻量且快速
 
 ## 界面预览
 
@@ -29,3 +30,18 @@
     <img src="images/en.png" alt="英文界面" style="width: 48%; height: auto; object-fit: cover;" />
     <img src="images/zh.png" alt="中文界面" style="width: 48%; height: auto; object-fit: cover;" />
 </div>
+
+## 开发
+
+单一源码位于 `src/`，通过构建脚本生成双浏览器产物：
+
+```bash
+npm install        # 安装开发依赖
+npm run build      # 构建 dist/chrome 与 dist/firefox
+npm test           # 运行导出格式契约测试
+npm run lint       # ESLint 检查
+npm run format     # Prettier 格式化
+npm run pack:firefox  # 使用 web-ext 打包 Firefox xpi
+```
+
+浏览器中加载：Chrome 打开 `chrome://extensions` 启用开发者模式后选择 `dist/chrome`；Firefox 打开 `about:debugging` 选择 `dist/firefox/manifest.json`。
