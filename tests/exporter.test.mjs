@@ -2,7 +2,8 @@
  * 导出格式契约测试。
  *
  * 验证 exporter 的输出严格符合配套项目 ChuwuBookmarks 的消费格式：
- * - 链接:   { type:'link', addDate:<ms int>, title, url, icon:[google, favicon.im] }
+ * - 链接:   { type:'link', addDate:<ms int>, title, url,
+ *             icon:[google s2, favicon.im, duckduckgo, 站点 /favicon.ico]（有序候选） }
  * - 文件夹: { type:'folder', addDate:<ms int>, title, children }
  * - structure.json: { version:1, generated:ISO, folders:[{ id, title, addDate,
  *   linkCount, folderCount, hasChildren, children? }] }
@@ -157,6 +158,12 @@ describe("filterTreeBySelection", () => {
     const emptyInfo = structure[0].children.find((c) => c.title === "空文件夹");
     assert.equal(emptyInfo.hasChildren, false);
     assert.ok(!("children" in emptyInfo));
+  });
+
+  it("选中的空顶级文件夹以 children:[] 保留（与嵌套语义一致）", () => {
+    const tree = [{ id: "9", title: "空根", dateAdded: 42, children: [] }];
+    const data = filterTreeBySelection(tree, new Set(["9"]), new Set(), NOW);
+    assert.deepEqual(data, [{ type: "folder", addDate: 42, title: "空根", children: [] }]);
   });
 });
 

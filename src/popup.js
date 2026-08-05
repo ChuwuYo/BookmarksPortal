@@ -22,6 +22,8 @@ const DOWNLOAD_STAGGER_MS = 500;
 /** @type {ReturnType<typeof createBookmarkTree>|null} */
 let tree = null;
 let statusTimer = null;
+/** 当前显示的状态消息键（用于语言切换后重渲染） */
+let lastStatusKey = null;
 
 const dom = {};
 
@@ -68,6 +70,10 @@ function bindEvents() {
     if (dom.exportButton.disabled) {
       dom.exportButton.textContent = t("exporting");
     }
+    // 状态栏消息为动态写入，需按新语言重渲染
+    if (lastStatusKey && !dom.statusBar.hidden) {
+      showStatus(lastStatusKey);
+    }
   });
 
   dom.themeToggle.addEventListener("click", () => {
@@ -102,6 +108,8 @@ async function loadBookmarks() {
     });
     dom.bookmarkList.replaceChildren(tree.element);
     updateSelectionCount();
+    // 树加载完成前输入的搜索词在此补应用
+    applyFilter();
   } catch (error) {
     console.error("Failed to load bookmarks:", error);
     showStatus("loadFailed");
@@ -150,11 +158,13 @@ function updateSelectionCount() {
  * @param {string} key 翻译键
  */
 function showStatus(key) {
+  lastStatusKey = key;
   clearTimeout(statusTimer);
   dom.statusBar.textContent = t(key);
   dom.statusBar.hidden = false;
   statusTimer = setTimeout(() => {
     dom.statusBar.hidden = true;
+    lastStatusKey = null;
   }, STATUS_CLEAR_MS);
 }
 
@@ -162,6 +172,7 @@ function showStatus(key) {
  * 立即隐藏状态消息。
  */
 function hideStatus() {
+  lastStatusKey = null;
   clearTimeout(statusTimer);
   dom.statusBar.hidden = true;
 }
@@ -185,6 +196,12 @@ async function exportSelectedBookmarks() {
   setExporting(true);
   const startTime = Date.now();
 
+  // 恢复按钮：保证最短禁用窗口，且必须发生在第二个下载触发之后（调用点保证）
+  const reenable = () => {
+    const remaining = MIN_EXPORTING_MS - (Date.now() - startTime);
+    setTimeout(() => setExporting(false), Math.max(0, remaining));
+  };
+
   try {
     const bookmarkTree = await getBookmarkTree();
     const rootChildren = bookmarkTree?.[0]?.children ?? [];
@@ -192,6 +209,7 @@ async function exportSelectedBookmarks() {
 
     if (exportData.length === 0) {
       showStatus("noSelection");
+      reenable();
       return;
     }
 
@@ -202,17 +220,17 @@ async function exportSelectedBookmarks() {
         downloadJson(buildStructureFile(exportData), STRUCTURE_FILENAME);
         showStatus("exportSuccess");
       } catch (error) {
+        // 书签文件已下载，仅目录结构文件失败，使用专属提示避免重复导出
         console.error("Error generating structure file:", error);
-        showStatus("exportError");
+        showStatus("structureError");
+      } finally {
+        reenable();
       }
     }, DOWNLOAD_STAGGER_MS);
   } catch (error) {
     console.error("Error exporting bookmarks:", error);
     showStatus("exportError");
-  } finally {
-    // 保持最短禁用窗口，防止快速重复点击产生重复导出
-    const elapsed = Date.now() - startTime;
-    setTimeout(() => setExporting(false), Math.max(0, MIN_EXPORTING_MS - elapsed));
+    reenable();
   }
 }
 

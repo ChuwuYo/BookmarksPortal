@@ -11,6 +11,8 @@
 - [x] 语言选择持久化、暗色模式、搜索过滤、已选计数、状态提示替代 alert
 - [x] 无障碍：tree/treeitem/group 角色、aria-expanded、原生 label 关联、focus-visible
 - [x] Prettier + ESLint + node:test 契约测试 + web-ext lint 零告警
+- [x] 字体优化：完整字体（1.2MB）改为构建期子集化，仅覆盖 UI 固定文案字符，
+      应用于标题/按钮/状态；书签树与搜索输入使用系统字体栈（见 scripts/subset-font.mjs）
 
 ## 功能增强（待办）
 
@@ -22,8 +24,3 @@
 ### 2. 添加更新检查机制
 
 - [ ] 使用 Github Release API（需权衡新增 host_permissions 权限）
-
-### 3. 字体优化（已完成）
-
-- [x] 完整字体（1.2MB）改为构建期子集化（~19KB），仅覆盖 UI 固定文案字符，
-      应用于标题/按钮/状态；书签树与搜索输入使用系统字体栈（见 scripts/subset-font.mjs）

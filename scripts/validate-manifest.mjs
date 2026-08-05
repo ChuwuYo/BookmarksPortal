@@ -63,6 +63,10 @@ for (const [name, manifest] of [
     check(!banned.includes(permission), `${name}: 不允许的权限 ${permission}`);
   }
   check(!("host_permissions" in manifest), `${name}: 不应声明 host_permissions（扩展零网络请求）`);
+  check(
+    !("web_accessible_resources" in manifest),
+    `${name}: 不应声明 web_accessible_resources（资源仅供扩展页自用）`
+  );
 }
 
 // ---- 浏览器专属 ----
