@@ -30,7 +30,7 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - run: npm ci
+      - run: npm ci --ignore-scripts
       - run: npm run format:check
       - run: npm run lint
       - run: npm run validate:manifest
@@ -55,7 +55,7 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - run: npm ci
+      - run: npm ci --ignore-scripts
       - run: npm run pack
       - name: Record provenance
         run: printf '%s\n' "$GITHUB_SHA" > dist/artifacts/source-sha.txt
