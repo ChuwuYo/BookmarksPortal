@@ -27,6 +27,9 @@ const translations = {
     loadFailed: "书签加载失败，请查看控制台了解详情。",
     expand: "展开",
     collapse: "收起",
+    themeSystem: "主题：跟随系统",
+    themeLight: "主题：亮色",
+    themeDark: "主题：暗色",
     selectedCount: (folders, links) => `已选 ${folders} 个文件夹、${links} 个链接`,
   },
   en: {
@@ -50,6 +53,9 @@ const translations = {
     loadFailed: "Failed to load bookmarks. Check the console for details.",
     expand: "Expand",
     collapse: "Collapse",
+    themeSystem: "Theme: System",
+    themeLight: "Theme: Light",
+    themeDark: "Theme: Dark",
     selectedCount: (folders, links) => `${folders} folders, ${links} links selected`,
   },
 };

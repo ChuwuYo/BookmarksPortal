@@ -12,30 +12,12 @@
     <div id="container" class="container">
       <header class="header-controls">
         <button
-          id="loadOptionsButton"
+          id="themeToggle"
           type="button"
           class="icon-btn"
-          data-i18n-aria="loadOptions"
-          data-i18n-title="loadOptions"
-          aria-label="加载上次选择"
-          title="加载上次选择"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            aria-hidden="true"
-          >
-            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-            <path d="M3 3v5h5" />
-          </svg>
-        </button>
+          aria-label="主题：跟随系统"
+          title="主题：跟随系统"
+        ></button>
         <h1 id="title" data-i18n="title">选择要导出的书签</h1>
         <button
           id="languageToggle"
@@ -68,15 +50,42 @@
         </button>
       </header>
 
-      <input
-        id="searchInput"
-        type="search"
-        class="search-input"
-        data-i18n-placeholder="searchPlaceholder"
-        data-i18n-aria="searchLabel"
-        placeholder="搜索书签…"
-        aria-label="搜索书签"
-      />
+      <div class="search-row">
+        <input
+          id="searchInput"
+          type="search"
+          class="search-input"
+          data-i18n-placeholder="searchPlaceholder"
+          data-i18n-aria="searchLabel"
+          placeholder="搜索书签…"
+          aria-label="搜索书签"
+        />
+        <button
+          id="loadOptionsButton"
+          type="button"
+          class="icon-btn"
+          data-i18n-aria="loadOptions"
+          data-i18n-title="loadOptions"
+          aria-label="加载上次选择"
+          title="加载上次选择"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+            <path d="M3 3v5h5" />
+          </svg>
+        </button>
+      </div>
 
       <div id="bookmarkList" class="bookmark-tree" role="tree" aria-label="Bookmark tree"></div>
 
