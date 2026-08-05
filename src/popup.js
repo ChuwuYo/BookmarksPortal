@@ -198,8 +198,13 @@ async function exportSelectedBookmarks() {
     downloadJson(exportData, makeBookmarkFilename());
     // 错峰触发第二个下载，避免浏览器拦截连续下载
     setTimeout(() => {
-      downloadJson(buildStructureFile(exportData), STRUCTURE_FILENAME);
-      showStatus("exportSuccess");
+      try {
+        downloadJson(buildStructureFile(exportData), STRUCTURE_FILENAME);
+        showStatus("exportSuccess");
+      } catch (error) {
+        console.error("Error generating structure file:", error);
+        showStatus("exportError");
+      }
     }, DOWNLOAD_STAGGER_MS);
   } catch (error) {
     console.error("Error exporting bookmarks:", error);

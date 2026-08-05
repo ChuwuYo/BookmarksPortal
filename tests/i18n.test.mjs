@@ -42,6 +42,10 @@ describe("i18n 一致性", () => {
       }
     }
     assert.ok(keys.size > 0, "应从 JS 中提取到 t() 键");
+    // 动态拼接的键（popup.js 的 updateThemeButton）无法被正则捕获，显式断言
+    keys.add("themeSystem");
+    keys.add("themeLight");
+    keys.add("themeDark");
     for (const key of keys) {
       for (const lang of ["zh", "en"]) {
         assert.ok(key in translations[lang], `缺少翻译键 [${lang}].${key}`);

@@ -49,13 +49,14 @@ function buildIconList(url) {
 
 /**
  * 规范化 addDate：必须是有限毫秒整数。
- * 浏览器偶尔会缺失 dateAdded（如部分导入的书签），此时回退为当前时间，
- * 避免旧实现中 Number(undefined) => NaN 被 JSON 序列化为 null 的问题。
+ * 浏览器偶尔会缺失 dateAdded（如部分导入的书签），此时回退为当前时间；
+ * null/空串 同样视为缺失，避免 Number() 将其折叠为 0（1970）。
  * @param {*} value
  * @param {number} fallback
  * @returns {number}
  */
 function normalizeAddDate(value, fallback) {
+  if (value === null || value === undefined || value === "") return fallback;
   const num = Number(value);
   return Number.isFinite(num) ? Math.trunc(num) : fallback;
 }
