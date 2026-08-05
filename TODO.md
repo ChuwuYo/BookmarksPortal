@@ -23,4 +23,7 @@
 
 - [ ] 使用 Github Release API（需权衡新增 host_permissions 权限）
 
-### 3. 替换一个合适的字体
+### 3. 字体优化（已完成）
+
+- [x] 完整字体（1.2MB）改为构建期子集化（~19KB），仅覆盖 UI 固定文案字符，
+      应用于标题/按钮/状态；书签树与搜索输入使用系统字体栈（见 scripts/subset-font.mjs）

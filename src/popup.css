@@ -42,10 +42,13 @@
   }
 }
 
-/* ===== 字体 ===== */
+/* ===== 字体 =====
+   品牌字体为构建期生成的 UI 文案子集（scripts/subset-font.mjs），
+   仅覆盖固定 UI 文案字符，因此只应用于 UI 框架（标题/按钮/状态），
+   用户数据（书签树、搜索输入）使用系统字体栈渲染。 */
 @font-face {
   font-family: "AlibabaHealthFont";
-  src: url("./fonts/AlibabaHealthFont2.0CN-45R.woff2") format("woff2");
+  src: url("./fonts/ui-subset.woff2") format("woff2");
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -59,7 +62,12 @@ html {
 }
 
 body {
-  font-family: "AlibabaHealthFont", system-ui, sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    "PingFang SC",
+    "Microsoft YaHei",
+    sans-serif;
   width: 380px;
   max-height: 600px;
   margin: 0;
@@ -107,6 +115,20 @@ body {
   to {
     transform: rotate(360deg);
   }
+}
+
+/* 品牌字体仅用于固定文案的 UI 框架元素（子集只覆盖这些字符） */
+h1,
+.btn,
+.status-bar,
+.selection-count {
+  font-family:
+    "AlibabaHealthFont",
+    system-ui,
+    -apple-system,
+    "PingFang SC",
+    "Microsoft YaHei",
+    sans-serif;
 }
 
 /* ===== 头部 ===== */
