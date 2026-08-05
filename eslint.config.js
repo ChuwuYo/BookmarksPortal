@@ -30,7 +30,7 @@ export default [
     },
   },
   {
-    files: ["tests/**/*.mjs", "build.mjs"],
+    files: ["tests/**/*.mjs", "scripts/*.mjs", "build.mjs"],
     languageOptions: {
       globals: {
         process: "readonly",

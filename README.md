@@ -41,7 +41,12 @@ npm run build      # 构建 dist/chrome 与 dist/firefox
 npm test           # 运行导出格式契约测试
 npm run lint       # ESLint 检查
 npm run format     # Prettier 格式化
-npm run pack:firefox  # 使用 web-ext 打包 Firefox xpi
+npm run pack       # 打包双浏览器 zip 到 dist/artifacts（含 SHA256）
+npm run verify     # 完整验证链（CI 同款）
 ```
 
 浏览器中加载：Chrome 打开 `chrome://extensions` 启用开发者模式后选择 `dist/chrome`；Firefox 打开 `about:debugging` 选择 `dist/firefox/manifest.json`。
+
+## 发布
+
+CI 推送 main 后自动发布滚动预览版（tag `latest`）；推送 `v*` 标签（需与 manifest 版本一致）自动发布正式版，同时附带 Chrome 与 Firefox 两个安装包及 SHA256 校验文件。

@@ -8,11 +8,13 @@
     "build": "node build.mjs",
     "build:chrome": "node build.mjs chrome",
     "build:firefox": "node build.mjs firefox",
-    "pack:firefox": "npm run build:firefox && web-ext build --source-dir dist/firefox --artifacts-dir dist/artifacts --overwrite-dest --filename bookmarks-portal-firefox.xpi",
+    "pack": "node scripts/pack.mjs",
     "test": "node --test \"tests/**/*.test.mjs\"",
-    "format": "prettier --write \"src/**/*.{js,css,html}\" \"manifests/*.json\" \"tests/**/*.mjs\" build.mjs",
-    "format:check": "prettier --check \"src/**/*.{js,css,html}\" \"manifests/*.json\" \"tests/**/*.mjs\" build.mjs",
-    "lint": "eslint src/ tests/ build.mjs"
+    "format": "prettier --write \"src/**/*.{js,css,html}\" \"manifests/*.json\" \"tests/**/*.mjs\" \"scripts/*.mjs\" build.mjs",
+    "format:check": "prettier --check \"src/**/*.{js,css,html}\" \"manifests/*.json\" \"tests/**/*.mjs\" \"scripts/*.mjs\" build.mjs",
+    "lint": "eslint src/ tests/ scripts/ build.mjs",
+    "validate:manifest": "node scripts/validate-manifest.mjs",
+    "verify": "npm run format:check && npm run lint && npm run validate:manifest && npm test && npm run build"
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",

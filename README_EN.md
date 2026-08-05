@@ -41,7 +41,12 @@ npm run build      # Build dist/chrome and dist/firefox
 npm test           # Run export-format contract tests
 npm run lint       # ESLint
 npm run format     # Prettier
-npm run pack:firefox  # Package Firefox xpi via web-ext
+npm run pack       # Pack both browser zips into dist/artifacts (with SHA256)
+npm run verify     # Full verification chain (same as CI)
 ```
 
 Load in browser: Chrome `chrome://extensions` with Developer mode -> select `dist/chrome`; Firefox `about:debugging` -> select `dist/firefox/manifest.json`.
+
+## Release
+
+Pushes to main automatically publish a rolling prerelease (tag `latest`); pushing a `v*` tag (must match the manifest version) publishes a formal release with both Chrome and Firefox packages plus a SHA256 checksum file.
