@@ -10,7 +10,7 @@
  * 构建用法：build.mjs 调用 buildSubsetFont() 直接写入 dist。
  */
 
-import { readFileSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import subsetFont from "subset-font";
@@ -70,6 +70,7 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
     process.exit(1);
   }
   const subset = await buildSubsetFont();
+  mkdirSync(dirname(outputPath), { recursive: true });
   writeFileSync(outputPath, subset);
   console.log(`✔ 字体子集 (${(subset.length / 1024).toFixed(1)}KB) -> ${outputPath}`);
 }

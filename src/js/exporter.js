@@ -5,7 +5,8 @@
  *
  * 输出格式契约（配套项目 ChuwuBookmarks 依赖，禁止破坏）：
  * - 书签文件：文件夹 { type:'folder', addDate:<ms int>, title, children:[...] }
- *            链接   { type:'link',   addDate:<ms int>, title, url, icon:[<google s2>, <favicon.im>] }
+ *            链接   { type:'link',   addDate:<ms int>, title, url,
+ *                     icon:[google s2, favicon.im, duckduckgo, 站点 /favicon.ico]（有序候选） }
  * - structure.json：{ version:1, generated:<ISO>, folders:[{ id:'0_1_2'式路径, title, addDate,
  *            linkCount, folderCount, hasChildren, children?（仅子文件夹） }] }
  *   路径 id 的索引基于「全部兄弟节点（含链接）」中的位置，与历史版本保持一致。
@@ -64,9 +65,10 @@ function normalizeAddDate(value, fallback) {
 /**
  * 按勾选状态过滤并转换书签树，生成导出数据。
  *
- * 节点入选条件（与历史版本语义一致）：
+ * 节点入选条件（与历史版本语义一致，顶级与嵌套文件夹规则相同）：
  * - 链接：复选框被完整勾选
  * - 文件夹：被勾选 / 半选 / 含有入选后代；其 children 递归应用同一规则
+ *   （被勾选的文件夹即使没有入选子项，也以 children:[] 保留）
  *
  * @param {Array} rootChildren 浏览器书签树的根级文件夹数组
  * @param {Set<string>} selectedIds 完整勾选的节点 id
@@ -84,7 +86,12 @@ function filterTreeBySelection(rootChildren, selectedIds, indeterminateIds, now 
       .map((child) => processNode(child, selectedIds, indeterminateIds, now))
       .filter(Boolean);
 
-    if (processedChildren.length > 0) {
+    // 与嵌套文件夹一致：被勾选/半选的顶级文件夹即使无入选子项也保留
+    if (
+      processedChildren.length > 0 ||
+      selectedIds.has(rootFolder.id) ||
+      indeterminateIds.has(rootFolder.id)
+    ) {
       exportData.push({
         type: "folder",
         addDate: normalizeAddDate(rootFolder.dateAdded, now),

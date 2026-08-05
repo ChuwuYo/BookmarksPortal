@@ -32,12 +32,12 @@ describe("i18n 一致性", () => {
     }
   });
 
-  it("JS 中 t() 引用的键全部存在于翻译表", () => {
+  it("JS 中 t()/showStatus() 引用的键全部存在于翻译表", () => {
     const files = ["src/popup.js", "src/js/tree.js"];
     const keys = new Set();
     for (const file of files) {
       const source = readFileSync(join(ROOT, file), "utf8");
-      for (const match of source.matchAll(/\bt\("(\w+)"\)/g)) {
+      for (const match of source.matchAll(/(?:\bt|showStatus)\("(\w+)"\)/g)) {
         keys.add(match[1]);
       }
     }

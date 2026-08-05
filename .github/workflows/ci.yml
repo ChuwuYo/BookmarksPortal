@@ -84,7 +84,7 @@ jobs:
         with:
           name: extension-zips
           path: release
-      - name: Verify artifact integrity and branch head
+      - name: Verify integrity, move tag, publish prerelease
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -92,30 +92,25 @@ jobs:
           cd release
           sha256sum -c SHA256SUMS.txt
           test "$(cat source-sha.txt)" = "$GITHUB_SHA"
-          # 过期 run（re-run 或并发）不接触线上 Release
+          # 过期 run（re-run 或并发）不接触线上 Release：校验与发布同步骤执行，消除 TOCTOU 窗口
           current="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/$GITHUB_REF_NAME" --jq '.object.sha')"
           test "$current" = "$GITHUB_SHA" || { echo "::error::$GITHUB_REF_NAME 已前进，拒绝用旧提交发布。"; exit 1; }
           mv BookmarksPortal-chrome.zip BookmarksPortal-chrome-latest.zip
           mv BookmarksPortal-firefox.zip BookmarksPortal-firefox-latest.zip
           # 重命名后重新生成校验文件，保持名称与摘要一致
           sha256sum BookmarksPortal-chrome-latest.zip BookmarksPortal-firefox-latest.zip > SHA256SUMS.txt
-      - name: Move latest tag to HEAD
-        run: |
+          cd ..
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git tag -fa latest -m "Rolling latest build"
           git push -f origin latest
-      - uses: softprops/action-gh-release@c12583777ecdfd3be55c69cf75464299dc01057e # v3
-        with:
-          tag_name: latest
-          name: Latest (continuous)
-          body: |
-            自动构建的最新扩展包（滚动测试渠道，与正式版 Release 互不冲突）。
-            提交：${{ github.sha }}
-          prerelease: true
-          files: |
-            release/BookmarksPortal-chrome-latest.zip
-            release/BookmarksPortal-firefox-latest.zip
+          gh release delete latest --yes 2>/dev/null || true
+          gh release create latest \
+            --prerelease \
+            --title "Latest (continuous)" \
+            --notes "自动构建的最新扩展包（滚动测试渠道，与正式版 Release 互不冲突）。提交：$GITHUB_SHA" \
+            release/BookmarksPortal-chrome-latest.zip \
+            release/BookmarksPortal-firefox-latest.zip \
             release/SHA256SUMS.txt
 
   release:
@@ -138,7 +133,7 @@ jobs:
         with:
           name: extension-zips
           path: release
-      - name: Verify digests before publishing
+      - name: Verify digests and publish release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -146,14 +141,12 @@ jobs:
           cd release
           sha256sum -c SHA256SUMS.txt
           test "$(cat source-sha.txt)" = "$GITHUB_SHA"
-          # 过期 run 不接触线上 Release：tag 必须仍指向本提交
+          # 过期 run 不接触线上 Release：tag 必须仍指向本提交；校验与发布同步骤执行，消除 TOCTOU 窗口
           git fetch --force origin "refs/tags/$GITHUB_REF_NAME:refs/tags/$GITHUB_REF_NAME"
           current="$(git rev-list -n 1 "$GITHUB_REF_NAME")"
           test "$current" = "$GITHUB_SHA" || { echo "::error::tag $GITHUB_REF_NAME 已移动，拒绝用旧提交发布。"; exit 1; }
-      - uses: softprops/action-gh-release@c12583777ecdfd3be55c69cf75464299dc01057e # v3
-        with:
-          files: |
-            release/BookmarksPortal-chrome.zip
-            release/BookmarksPortal-firefox.zip
-            release/SHA256SUMS.txt
-          generate_release_notes: true
+          gh release create "$GITHUB_REF_NAME" \
+            --generate-notes \
+            BookmarksPortal-chrome.zip \
+            BookmarksPortal-firefox.zip \
+            SHA256SUMS.txt

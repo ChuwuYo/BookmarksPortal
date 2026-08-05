@@ -25,15 +25,18 @@ const TARGETS = ["chrome", "firefox"];
 const requested = process.argv.slice(2);
 const targets = requested.length > 0 ? requested : TARGETS;
 
-// UI 字体子集：每次构建从当前文案现算字符集（文案变更自动同步）
-const subsetFontBuffer = await buildSubsetFont();
-
+// 先校验目标有效性，再做昂贵的字体子集化
 for (const target of targets) {
   if (!TARGETS.includes(target)) {
     console.error(`Unknown target: ${target} (expected: ${TARGETS.join(", ")})`);
     process.exit(1);
   }
+}
 
+// UI 字体子集：每次构建从当前文案现算字符集（文案变更自动同步）
+const subsetFontBuffer = await buildSubsetFont();
+
+for (const target of targets) {
   const outDir = join(DIST_DIR, target);
   rmSync(outDir, { recursive: true, force: true });
   mkdirSync(outDir, { recursive: true });

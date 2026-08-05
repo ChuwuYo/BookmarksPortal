@@ -9,7 +9,6 @@ import { JSDOM } from "jsdom";
 
 const dom = new JSDOM("<!doctype html><html><body></body></html>");
 globalThis.document = dom.window.document;
-globalThis.CustomEvent = dom.window.CustomEvent;
 
 const { createBookmarkTree } = await import("../src/js/tree.js");
 

@@ -151,6 +151,8 @@ function createBookmarkTree(nodes, { t, onSelectionChange }) {
       header.appendChild(toggleBtn);
       model.toggleBtn = toggleBtn;
       header.setAttribute("aria-expanded", "false");
+      // group 不是 treeitem 的 DOM 后代，用 aria-owns 显式建立所有权
+      header.setAttribute("aria-owns", groupId);
 
       const childrenEl = document.createElement("div");
       childrenEl.className = "children-container";
