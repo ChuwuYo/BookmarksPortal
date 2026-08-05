@@ -1,0 +1,257 @@
+{
+ "bookmarks": [
+  {
+   "type": "folder",
+   "addDate": 1700000000000,
+   "title": "根文件夹",
+   "children": [
+    {
+     "type": "folder",
+     "addDate": 1700000000001,
+     "title": "纯链接夹",
+     "children": [
+      {
+       "type": "link",
+       "addDate": 1700000000010,
+       "title": "示例站点甲",
+       "url": "https://alpha.example.com/",
+       "icon": [
+        "https://www.google.com/s2/favicons?domain=alpha.example.com",
+        "https://favicon.im/alpha.example.com"
+       ]
+      },
+      {
+       "type": "link",
+       "addDate": 1700000000011,
+       "title": "示例站点乙",
+       "url": "https://beta.example.com/",
+       "icon": [
+        "https://www.google.com/s2/favicons?domain=beta.example.com",
+        "https://favicon.im/beta.example.com"
+       ]
+      }
+     ]
+    },
+    {
+     "type": "folder",
+     "addDate": 1700000000002,
+     "title": "混合夹",
+     "children": [
+      {
+       "type": "link",
+       "addDate": 1700000000020,
+       "title": "示例站点丙",
+       "url": "https://gamma.example.com/",
+       "icon": [
+        "https://www.google.com/s2/favicons?domain=gamma.example.com",
+        "https://favicon.im/gamma.example.com"
+       ]
+      },
+      {
+       "type": "link",
+       "addDate": 1700000000021,
+       "title": "示例站点丁",
+       "url": "https://delta.example.com/",
+       "icon": [
+        "https://www.google.com/s2/favicons?domain=delta.example.com",
+        "https://favicon.im/delta.example.com"
+       ]
+      },
+      {
+       "type": "folder",
+       "addDate": 1700000000022,
+       "title": "子夹A",
+       "children": [
+        {
+         "type": "link",
+         "addDate": 1700000000030,
+         "title": "示例站点戊",
+         "url": "https://epsilon.example.com/",
+         "icon": [
+          "https://www.google.com/s2/favicons?domain=epsilon.example.com",
+          "https://favicon.im/epsilon.example.com"
+         ]
+        },
+        {
+         "type": "link",
+         "addDate": 1700000000031,
+         "title": "示例站点己",
+         "url": "https://zeta.example.com/",
+         "icon": [
+          "https://www.google.com/s2/favicons?domain=zeta.example.com",
+          "https://favicon.im/zeta.example.com"
+         ]
+        }
+       ]
+      },
+      {
+       "type": "link",
+       "addDate": 1700000000023,
+       "title": "示例站点庚",
+       "url": "https://eta.example.com/",
+       "icon": [
+        "https://www.google.com/s2/favicons?domain=eta.example.com",
+        "https://favicon.im/eta.example.com"
+       ]
+      },
+      {
+       "type": "folder",
+       "addDate": 1700000000024,
+       "title": "子夹B",
+       "children": [
+        {
+         "type": "link",
+         "addDate": 1700000000040,
+         "title": "示例站点辛",
+         "url": "https://theta.example.com/",
+         "icon": [
+          "https://www.google.com/s2/favicons?domain=theta.example.com",
+          "https://favicon.im/theta.example.com"
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "structureChildren": [
+  {
+   "id": "0_0",
+   "title": "纯链接夹",
+   "addDate": 1700000000001,
+   "linkCount": 2,
+   "folderCount": 0,
+   "hasChildren": true
+  },
+  {
+   "id": "0_1",
+   "title": "混合夹",
+   "addDate": 1700000000002,
+   "linkCount": 3,
+   "folderCount": 2,
+   "hasChildren": true,
+   "children": [
+    {
+     "id": "0_1_2",
+     "title": "子夹A",
+     "addDate": 1700000000022,
+     "linkCount": 2,
+     "folderCount": 0,
+     "hasChildren": true
+    },
+    {
+     "id": "0_1_4",
+     "title": "子夹B",
+     "addDate": 1700000000024,
+     "linkCount": 1,
+     "folderCount": 0,
+     "hasChildren": true
+    }
+   ]
+  }
+ ],
+ "shiftedCase": {
+  "bookmarks": [
+   {
+    "type": "folder",
+    "addDate": 1700000001000,
+    "title": "偏移演示父夹",
+    "children": [
+     {
+      "type": "link",
+      "addDate": 1700000001010,
+      "title": "示例链接一",
+      "url": "https://one.example.com/",
+      "icon": [
+       "https://www.google.com/s2/favicons?domain=one.example.com",
+       "https://favicon.im/one.example.com"
+      ]
+     },
+     {
+      "type": "link",
+      "addDate": 1700000001011,
+      "title": "示例链接二",
+      "url": "https://two.example.com/",
+      "icon": [
+       "https://www.google.com/s2/favicons?domain=two.example.com",
+       "https://favicon.im/two.example.com"
+      ]
+     },
+     {
+      "type": "link",
+      "addDate": 1700000001012,
+      "title": "示例链接三",
+      "url": "https://three.example.com/",
+      "icon": [
+       "https://www.google.com/s2/favicons?domain=three.example.com",
+       "https://favicon.im/three.example.com"
+      ]
+     },
+     {
+      "type": "folder",
+      "addDate": 1700000001013,
+      "title": "被偏移的文件夹",
+      "children": [
+       {
+        "type": "link",
+        "addDate": 1700000001020,
+        "title": "示例链接四",
+        "url": "https://four.example.com/",
+        "icon": [
+         "https://www.google.com/s2/favicons?domain=four.example.com",
+         "https://favicon.im/four.example.com"
+        ]
+       }
+      ]
+     },
+     {
+      "type": "link",
+      "addDate": 1700000001014,
+      "title": "示例链接五",
+      "url": "https://five.example.com/",
+      "icon": [
+       "https://www.google.com/s2/favicons?domain=five.example.com",
+       "https://favicon.im/five.example.com"
+      ]
+     },
+     {
+      "type": "folder",
+      "addDate": 1700000001015,
+      "title": "末尾夹",
+      "children": []
+     }
+    ]
+   }
+  ],
+  "structure": [
+   {
+    "id": "0",
+    "title": "偏移演示父夹",
+    "addDate": 1700000001000,
+    "linkCount": 4,
+    "folderCount": 2,
+    "hasChildren": true,
+    "children": [
+     {
+      "id": "0_3",
+      "title": "被偏移的文件夹",
+      "addDate": 1700000001013,
+      "linkCount": 1,
+      "folderCount": 0,
+      "hasChildren": true
+     },
+     {
+      "id": "0_5",
+      "title": "末尾夹",
+      "addDate": 1700000001015,
+      "linkCount": 0,
+      "folderCount": 0,
+      "hasChildren": false
+     }
+    ]
+   }
+  ]
+ }
+}

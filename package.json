@@ -3,6 +3,9 @@
   "version": "5.0.0",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": ">=21"
+  },
   "description": "导出选定的书签为规整的JSON格式文件（ChuwuBookmarks 配套浏览器扩展）",
   "scripts": {
     "build": "node build.mjs",

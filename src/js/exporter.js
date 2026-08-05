@@ -209,9 +209,7 @@ const STRUCTURE_FILENAME = "structure.json";
 
 export {
   STRUCTURE_FILENAME,
-  buildIconList,
   buildStructureFile,
-  extractHostname,
   filterTreeBySelection,
   generateStructure,
   makeBookmarkFilename,
