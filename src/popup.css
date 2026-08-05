@@ -27,18 +27,18 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-primary: #cfc4d4;
-    --color-primary-rgb: 207, 196, 212;
-    --color-on-primary: #2d2430;
-    --color-surface: #1c1b22;
-    --color-surface-raised: #26252d;
-    --color-node-bg: #2b2a33;
-    --color-text: #fbfbfe;
-    --color-outline: #9a94a3;
-    --color-outline-rgb: 154, 148, 163;
-    --color-accent-border: #3a5f55;
-    --color-link-icon: #7ac07e;
-    --color-status: #f0b26b;
+    --color-primary: #8fb8ac;
+    --color-primary-rgb: 143, 184, 172;
+    --color-on-primary: #122019;
+    --color-surface: #191b1d;
+    --color-surface-raised: #222527;
+    --color-node-bg: #242729;
+    --color-text: #e8eae9;
+    --color-outline: #99a2a0;
+    --color-outline-rgb: 153, 162, 160;
+    --color-accent-border: #3a524b;
+    --color-link-icon: #7cc293;
+    --color-status: #d9b38c;
   }
 }
 
@@ -88,27 +88,6 @@ body {
   gap: 10px;
   min-height: 320px;
   position: relative;
-}
-
-/* ===== 加载动画 ===== */
-.container.loading::before {
-  content: "";
-  position: absolute;
-  width: 30px;
-  height: 30px;
-  left: 50%;
-  top: 50%;
-  margin: -15px 0 0 -15px;
-  border-radius: 50%;
-  border: 4px solid rgba(var(--color-outline-rgb), 0.2);
-  border-top-color: var(--color-primary);
-  animation: spin 1s linear infinite;
-  z-index: 10;
-}
-
-.container.loading > * {
-  opacity: 0;
-  pointer-events: none;
 }
 
 @keyframes spin {
