@@ -13,7 +13,6 @@ import { applyStaticTexts, t, toggleLanguage } from "./js/i18n.js";
 import { createBookmarkTree } from "./js/tree.js";
 
 const OPTIONS_STORAGE_KEY = "bookmarksPortalOptions";
-const MIN_LOADING_MS = 300;
 const MIN_EXPORTING_MS = 1000;
 const STATUS_CLEAR_MS = 4000;
 const SEARCH_DEBOUNCE_MS = 150;
@@ -36,7 +35,6 @@ function init() {
 
 function cacheDom() {
   for (const id of [
-    "container",
     "bookmarkList",
     "searchInput",
     "selectAll",
@@ -77,9 +75,9 @@ function bindEvents() {
 
 /**
  * 加载并渲染书签树。
+ * 书签 API 为本地读取，首帧即顶级目录，无需加载动画。
  */
 async function loadBookmarks() {
-  const startTime = Date.now();
   try {
     const bookmarkTree = await getBookmarkTree();
     const rootChildren = bookmarkTree?.[0]?.children ?? [];
@@ -98,13 +96,6 @@ async function loadBookmarks() {
   } catch (error) {
     console.error("Failed to load bookmarks:", error);
     showStatus("loadFailed");
-  } finally {
-    // 保证加载动画的最短展示时间，避免闪烁
-    const elapsed = Date.now() - startTime;
-    setTimeout(
-      () => dom.container.classList.remove("loading"),
-      Math.max(0, MIN_LOADING_MS - elapsed)
-    );
   }
 }
 
