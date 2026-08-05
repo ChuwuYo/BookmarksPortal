@@ -169,6 +169,9 @@ h1 {
   border-radius: var(--radius-medium);
   box-sizing: border-box;
   transition: border-color var(--transition-fast);
+  /* 统一 Blink/Gecko 原生搜索框外观（去除 Chrome 原生清除钮等差异） */
+  appearance: none;
+  -webkit-appearance: none;
 }
 
 .search-input:focus-visible {
@@ -188,6 +191,9 @@ h1 {
   border-radius: var(--radius-large);
   background-color: rgba(var(--color-primary-rgb), 0.05);
   scroll-behavior: smooth;
+  /* Firefox 滚动条（Chrome 使用下方的 ::-webkit-scrollbar） */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(var(--color-outline-rgb), 0.6) transparent;
 }
 
 .bookmark-tree::-webkit-scrollbar {
