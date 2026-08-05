@@ -1,0 +1,32 @@
+{
+  "name": "bookmarks-portal",
+  "version": "5.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=21"
+  },
+  "description": "导出选定的书签为规整的JSON格式文件（ChuwuBookmarks 配套浏览器扩展）",
+  "scripts": {
+    "build": "node build.mjs",
+    "build:chrome": "node build.mjs chrome",
+    "build:firefox": "node build.mjs firefox",
+    "pack": "node scripts/pack.mjs",
+    "subset:font": "node scripts/subset-font.mjs",
+    "test": "node --test \"tests/**/*.test.mjs\"",
+    "format": "prettier --write \"src/**/*.{js,css,html}\" \"manifests/*.json\" \"tests/**/*.mjs\" \"scripts/*.mjs\" build.mjs",
+    "format:check": "prettier --check \"src/**/*.{js,css,html}\" \"manifests/*.json\" \"tests/**/*.mjs\" \"scripts/*.mjs\" build.mjs",
+    "lint": "eslint src/ tests/ scripts/ build.mjs",
+    "validate:manifest": "node scripts/validate-manifest.mjs",
+    "verify": "npm run format:check && npm run lint && npm run validate:manifest && npm test && npm run build && npx web-ext lint --source-dir dist/firefox"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.0.0",
+    "eslint": "^9.0.0",
+    "jsdom": "^30.0.1",
+    "prettier": "^3.0.0",
+    "subset-font": "^2.5.0",
+    "web-ext": "^8.0.0",
+    "yazl": "^3.3.1"
+  }
+}

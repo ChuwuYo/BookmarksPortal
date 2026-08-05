@@ -1,0 +1,462 @@
+/* ===== 设计令牌 ===== */
+:root {
+  --color-primary: #58505b;
+  --color-primary-rgb: 88, 80, 91;
+  --color-on-primary: #fafcda;
+  --color-surface: #f8fcfb;
+  --color-surface-raised: #ffffff;
+  --color-node-bg: #eeeeee;
+  --color-text: #1d1b20;
+  --color-outline: #79747e;
+  --color-outline-rgb: 121, 116, 126;
+  --color-accent-border: #a4d1c4;
+  --color-link-icon: #3d8b40;
+  --color-status: #8a4b00;
+
+  --radius-small: 6px;
+  --radius-medium: 12px;
+  --radius-large: 16px;
+  --radius-pill: 28px;
+
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-fast: 0.15s var(--ease-standard);
+  --transition-standard: 0.25s var(--ease-standard);
+
+  color-scheme: light;
+}
+
+/* 暗色调色板：由 theme.js 按 跟随系统/亮色/暗色 三态切换 .dark 类 */
+:root.dark {
+  color-scheme: dark;
+  --color-primary: #8fb8ac;
+  --color-primary-rgb: 143, 184, 172;
+  --color-on-primary: #122019;
+  --color-surface: #191b1d;
+  --color-surface-raised: #222527;
+  --color-node-bg: #242729;
+  --color-text: #e8eae9;
+  --color-outline: #99a2a0;
+  --color-outline-rgb: 153, 162, 160;
+  --color-accent-border: #3a524b;
+  --color-link-icon: #7cc293;
+  --color-status: #d9b38c;
+}
+
+/* ===== 字体 =====
+   品牌字体为构建期生成的 UI 文案子集（scripts/subset-font.mjs），
+   仅覆盖固定 UI 文案字符，因此只应用于 UI 框架（标题/按钮/状态），
+   用户数据（书签树、搜索输入）使用系统字体栈渲染。 */
+@font-face {
+  font-family: AlibabaHealthFont;
+  src: url("./fonts/ui-subset.woff2") format("woff2");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ===== 基础 ===== */
+html {
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-surface);
+}
+
+body {
+  font-family:
+    system-ui,
+    -apple-system,
+    "PingFang SC",
+    "Microsoft YaHei",
+    sans-serif;
+  width: 380px;
+  max-height: 600px;
+  margin: 0;
+  padding: 12px;
+  color: var(--color-text);
+  background-color: var(--color-surface);
+  user-select: none;
+  -webkit-user-select: none;
+  overflow-y: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  box-sizing: border-box;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 320px;
+  position: relative;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 品牌字体仅用于固定文案的 UI 框架元素（子集只覆盖这些字符） */
+h1,
+.btn,
+.status-bar,
+.selection-count {
+  font-family:
+    AlibabaHealthFont,
+    system-ui,
+    -apple-system,
+    "PingFang SC",
+    "Microsoft YaHei",
+    sans-serif;
+}
+
+/* ===== 头部 ===== */
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+h1 {
+  flex: 1;
+  margin: 0;
+  padding: 10px 12px;
+  font-size: 20px;
+  font-weight: 500;
+  text-align: center;
+  color: var(--color-primary);
+  background-color: rgba(var(--color-primary-rgb), 0.1);
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.icon-btn {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: var(--radius-medium);
+  background-color: var(--color-primary);
+  color: var(--color-on-primary);
+  cursor: pointer;
+  transition: filter var(--transition-fast);
+}
+
+.icon-btn:hover {
+  filter: brightness(1.12);
+}
+
+.icon-btn:active {
+  filter: brightness(0.92);
+}
+
+/* ===== 搜索行（搜索框 + 重置按钮，等高对齐） ===== */
+.search-row {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.search-row .search-input {
+  flex: 1;
+  height: 38px;
+}
+
+.search-row #loadOptionsButton {
+  width: 38px;
+  height: 38px;
+}
+
+/* ===== 搜索框 ===== */
+.search-input {
+  width: 100%;
+  padding: 10px 14px;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--color-text);
+  background: var(--color-surface-raised);
+  border: 1px solid rgba(var(--color-outline-rgb), 0.35);
+  border-radius: var(--radius-medium);
+  box-sizing: border-box;
+  transition: border-color var(--transition-fast);
+  /* 统一 Blink/Gecko 原生搜索框外观（去除 Chrome 原生清除钮等差异） */
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.search-input:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+  border-color: transparent;
+}
+
+/* ===== 书签树 ===== */
+.bookmark-tree {
+  flex-grow: 1;
+  min-height: 200px;
+  max-height: 380px;
+  overflow-y: auto;
+  padding: 6px;
+  border: 1px solid var(--color-accent-border);
+  border-radius: var(--radius-large);
+  background-color: rgba(var(--color-primary-rgb), 0.05);
+  scroll-behavior: smooth;
+  /* Firefox 滚动条（Chrome 使用下方的 ::-webkit-scrollbar） */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(var(--color-outline-rgb), 0.6) transparent;
+}
+
+.bookmark-tree::-webkit-scrollbar {
+  width: 6px;
+}
+
+.bookmark-tree::-webkit-scrollbar-thumb {
+  background: rgba(var(--color-outline-rgb), 0.6);
+  border-radius: 10px;
+}
+
+.bookmark-node {
+  margin: 3px 0;
+}
+
+.node-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 8px;
+  border-radius: var(--radius-medium);
+  background-color: var(--color-node-bg);
+  transition: background-color var(--transition-fast);
+}
+
+.node-header:hover {
+  background-color: rgba(var(--color-primary-rgb), 0.14);
+}
+
+.node-label {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+/* 展开按钮 */
+.toggle-btn,
+.toggle-spacer {
+  flex: none;
+  width: 22px;
+  height: 22px;
+}
+
+.toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-outline);
+  cursor: pointer;
+  transition:
+    transform var(--transition-standard),
+    color var(--transition-fast);
+}
+
+.toggle-btn svg {
+  transition: transform var(--transition-standard);
+}
+
+.toggle-btn.expanded {
+  color: var(--color-primary);
+}
+
+.toggle-btn.expanded svg {
+  transform: rotate(90deg);
+}
+
+/* 复选框 */
+.node-checkbox {
+  flex: none;
+  width: 17px;
+  height: 17px;
+  margin: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  border: 2px solid var(--color-outline);
+  border-radius: var(--radius-small);
+  background-color: var(--color-surface-raised);
+  cursor: pointer;
+  position: relative;
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.node-checkbox:checked,
+.node-checkbox:indeterminate {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.node-checkbox:checked::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 45%;
+  transform: translate(-50%, -50%) rotate(45deg);
+  width: 5px;
+  height: 9px;
+  border: solid var(--color-on-primary);
+  border-width: 0 2px 2px 0;
+}
+
+.node-checkbox:indeterminate::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 8px;
+  height: 2px;
+  background-color: var(--color-on-primary);
+  border-radius: 1px;
+}
+
+.node-checkbox:focus-visible,
+.toggle-btn:focus-visible,
+.icon-btn:focus-visible,
+.btn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.folder-icon {
+  color: var(--color-primary);
+  display: inline-flex;
+  flex: none;
+}
+
+.link-icon {
+  color: var(--color-link-icon);
+  display: inline-flex;
+  flex: none;
+}
+
+.node-title {
+  font-size: 13.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.children-container {
+  margin-top: 3px;
+}
+
+/* ===== 状态与计数 ===== */
+.selection-count {
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-outline);
+  text-align: center;
+  min-height: 1em;
+}
+
+.status-bar {
+  margin: 0;
+  padding: 8px 12px;
+  font-size: 13px;
+  text-align: center;
+  color: var(--color-status);
+  background-color: rgba(var(--color-outline-rgb), 0.12);
+  border-radius: var(--radius-medium);
+}
+
+/* ===== 底部按钮 ===== */
+.button-group {
+  display: flex;
+  gap: 10px;
+}
+
+.btn {
+  flex: 1;
+  min-width: 0;
+  padding: 11px 8px;
+  border: none;
+  border-radius: var(--radius-pill);
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: filter var(--transition-fast);
+  position: relative;
+}
+
+.btn:hover {
+  filter: brightness(1.08);
+}
+
+.btn:active {
+  filter: brightness(0.94);
+}
+
+.btn.primary {
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+.btn.secondary {
+  background: rgba(var(--color-primary-rgb), 0.14);
+  color: var(--color-primary);
+}
+
+.btn:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+/* 按钮加载动画 */
+.btn.loading {
+  color: transparent;
+  pointer-events: none;
+}
+
+.btn.loading::after {
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  left: 50%;
+  top: 50%;
+  margin: -9px 0 0 -9px;
+  border-radius: 50%;
+  border: 2.5px solid transparent;
+  border-top-color: var(--color-on-primary);
+  animation: spin 1s linear infinite;
+}
+
+/* ===== 动效降级 ===== */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .bookmark-tree {
+    scroll-behavior: auto;
+  }
+}
