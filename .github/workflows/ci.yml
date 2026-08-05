@@ -1,0 +1,150 @@
+name: CI
+
+# 所有 push / PR 只经过同一个验证关；验证通过的 main 才继续打包与滚动发布。
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# 所有 ref 统一：新提交到达即取消同 ref 在跑的旧 run。
+# main 的 publish 步骤有分支头检查兜底，过期 run 不会接触线上 Release。
+concurrency:
+  group: ${{ format('ci-{0}', github.ref) }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run format:check
+      - run: npm run lint
+      - run: npm run validate:manifest
+      - run: npm test
+      - run: npm run build
+      - name: Lint Firefox extension
+        run: npx web-ext lint --source-dir dist/firefox
+
+  package:
+    name: Build extension zips
+    needs: verify
+    if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run pack
+      - name: Record provenance
+        run: printf '%s\n' "$GITHUB_SHA" > dist/artifacts/source-sha.txt
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: extension-zips
+          path: |
+            dist/artifacts/BookmarksPortal-chrome.zip
+            dist/artifacts/BookmarksPortal-firefox.zip
+            dist/artifacts/SHA256SUMS.txt
+            dist/artifacts/source-sha.txt
+          if-no-files-found: error
+          retention-days: 7
+
+  publish-latest:
+    name: Publish rolling prerelease
+    needs: package
+    if: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: extension-zips
+          path: release
+      - name: Verify artifact integrity and branch head
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          cd release
+          sha256sum -c SHA256SUMS.txt
+          test "$(cat source-sha.txt)" = "$GITHUB_SHA"
+          # 过期 run（re-run 或并发）不接触线上 Release
+          current="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/$GITHUB_REF_NAME" --jq '.object.sha')"
+          test "$current" = "$GITHUB_SHA" || { echo "::error::$GITHUB_REF_NAME 已前进，拒绝用旧提交发布。"; exit 1; }
+          mv BookmarksPortal-chrome.zip BookmarksPortal-chrome-latest.zip
+          mv BookmarksPortal-firefox.zip BookmarksPortal-firefox-latest.zip
+      - name: Move latest tag to HEAD
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -fa latest -m "Rolling latest build"
+          git push -f origin latest
+      - uses: softprops/action-gh-release@c12583777ecdfd3be55c69cf75464299dc01057e # v3
+        with:
+          tag_name: latest
+          name: Latest (continuous)
+          body: |
+            自动构建的最新扩展包（滚动测试渠道，与正式版 Release 互不冲突）。
+            提交：${{ github.sha }}
+          prerelease: true
+          files: |
+            release/BookmarksPortal-chrome-latest.zip
+            release/BookmarksPortal-firefox-latest.zip
+
+  release:
+    name: Publish tagged release
+    needs: package
+    if: ${{ startsWith(github.ref, 'refs/tags/v') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Guard tag/version match
+        run: |
+          set -euo pipefail
+          TAG=${GITHUB_REF_NAME#v}
+          VERSION=$(jq -r .version manifests/chrome.json)
+          test "$TAG" = "$VERSION" || { echo "tag $TAG != manifest version $VERSION"; exit 1; }
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: extension-zips
+          path: release
+      - name: Verify digests before publishing
+        run: |
+          set -euo pipefail
+          cd release
+          sha256sum -c SHA256SUMS.txt
+          test "$(cat source-sha.txt)" = "$GITHUB_SHA"
+      - uses: softprops/action-gh-release@c12583777ecdfd3be55c69cf75464299dc01057e # v3
+        with:
+          files: |
+            release/BookmarksPortal-chrome.zip
+            release/BookmarksPortal-firefox.zip
+            release/SHA256SUMS.txt
+          generate_release_notes: true
