@@ -139,11 +139,17 @@ jobs:
           name: extension-zips
           path: release
       - name: Verify digests before publishing
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           cd release
           sha256sum -c SHA256SUMS.txt
           test "$(cat source-sha.txt)" = "$GITHUB_SHA"
+          # 过期 run 不接触线上 Release：tag 必须仍指向本提交
+          git fetch --force origin "refs/tags/$GITHUB_REF_NAME:refs/tags/$GITHUB_REF_NAME"
+          current="$(git rev-list -n 1 "$GITHUB_REF_NAME")"
+          test "$current" = "$GITHUB_SHA" || { echo "::error::tag $GITHUB_REF_NAME 已移动，拒绝用旧提交发布。"; exit 1; }
       - uses: softprops/action-gh-release@c12583777ecdfd3be55c69cf75464299dc01057e # v3
         with:
           files: |

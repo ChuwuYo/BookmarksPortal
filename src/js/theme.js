@@ -12,7 +12,8 @@ const darkMedia =
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 
-function getTheme() {
+/** 从持久化存储读取初始模式（非法值回退 system） */
+function readStoredTheme() {
   try {
     const stored = localStorage.getItem(THEME_STORAGE_KEY);
     if (MODES.includes(stored)) return stored;
@@ -22,20 +23,30 @@ function getTheme() {
   return "system";
 }
 
+/**
+ * 当前模式（内存事实源）。
+ * 持久化失败时仍以内存值为准，保证按钮标签与实际主题一致。
+ */
+let currentMode = readStoredTheme();
+
+function getTheme() {
+  return currentMode;
+}
+
 function applyTheme(mode) {
   const dark = mode === "dark" || (mode === "system" && !!darkMedia?.matches);
   document.documentElement.classList.toggle("dark", dark);
 }
 
 function cycleTheme() {
-  const next = MODES[(MODES.indexOf(getTheme()) + 1) % MODES.length];
+  currentMode = MODES[(MODES.indexOf(currentMode) + 1) % MODES.length];
   try {
-    localStorage.setItem(THEME_STORAGE_KEY, next);
+    localStorage.setItem(THEME_STORAGE_KEY, currentMode);
   } catch {
     // 持久化失败不影响本次切换
   }
-  applyTheme(next);
-  return next;
+  applyTheme(currentMode);
+  return currentMode;
 }
 
 darkMedia?.addEventListener?.("change", () => {

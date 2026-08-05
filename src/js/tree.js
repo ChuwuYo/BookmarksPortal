@@ -84,6 +84,7 @@ const ICONS = {
 function createBookmarkTree(nodes, { t, onSelectionChange }) {
   const rootEl = document.createElement("div");
   rootEl.className = "tree-root";
+  rootEl.setAttribute("role", "presentation");
 
   const allNodes = [];
   let idSeq = 0;
@@ -122,6 +123,7 @@ function createBookmarkTree(nodes, { t, onSelectionChange }) {
     allNodes.push(model);
 
     model.itemEl.className = "bookmark-node";
+    model.itemEl.setAttribute("role", "presentation");
 
     // ---- 节点头部 ----
     const header = model.headerEl;

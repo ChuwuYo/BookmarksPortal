@@ -47,7 +47,7 @@
    仅覆盖固定 UI 文案字符，因此只应用于 UI 框架（标题/按钮/状态），
    用户数据（书签树、搜索输入）使用系统字体栈渲染。 */
 @font-face {
-  font-family: "AlibabaHealthFont";
+  font-family: AlibabaHealthFont;
   src: url("./fonts/ui-subset.woff2") format("woff2");
   font-weight: normal;
   font-style: normal;
@@ -102,7 +102,7 @@ h1,
 .status-bar,
 .selection-count {
   font-family:
-    "AlibabaHealthFont",
+    AlibabaHealthFont,
     system-ui,
     -apple-system,
     "PingFang SC",
