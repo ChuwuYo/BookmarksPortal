@@ -22,24 +22,24 @@
   --transition-fast: 0.15s var(--ease-standard);
   --transition-standard: 0.25s var(--ease-standard);
 
-  color-scheme: light dark;
+  color-scheme: light;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-primary: #8fb8ac;
-    --color-primary-rgb: 143, 184, 172;
-    --color-on-primary: #122019;
-    --color-surface: #191b1d;
-    --color-surface-raised: #222527;
-    --color-node-bg: #242729;
-    --color-text: #e8eae9;
-    --color-outline: #99a2a0;
-    --color-outline-rgb: 153, 162, 160;
-    --color-accent-border: #3a524b;
-    --color-link-icon: #7cc293;
-    --color-status: #d9b38c;
-  }
+/* 暗色调色板：由 theme.js 按 跟随系统/亮色/暗色 三态切换 .dark 类 */
+:root.dark {
+  color-scheme: dark;
+  --color-primary: #8fb8ac;
+  --color-primary-rgb: 143, 184, 172;
+  --color-on-primary: #122019;
+  --color-surface: #191b1d;
+  --color-surface-raised: #222527;
+  --color-node-bg: #242729;
+  --color-text: #e8eae9;
+  --color-outline: #99a2a0;
+  --color-outline-rgb: 153, 162, 160;
+  --color-accent-border: #3a524b;
+  --color-link-icon: #7cc293;
+  --color-status: #d9b38c;
 }
 
 /* ===== 字体 =====
@@ -145,17 +145,32 @@ h1 {
   background-color: var(--color-primary);
   color: var(--color-on-primary);
   cursor: pointer;
-  transition:
-    transform var(--transition-fast),
-    opacity var(--transition-fast);
+  transition: filter var(--transition-fast);
 }
 
 .icon-btn:hover {
-  transform: translateY(-2px);
+  filter: brightness(1.12);
 }
 
 .icon-btn:active {
-  transform: translateY(0);
+  filter: brightness(0.92);
+}
+
+/* ===== 搜索行（搜索框 + 重置按钮，等高对齐） ===== */
+.search-row {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.search-row .search-input {
+  flex: 1;
+  height: 38px;
+}
+
+.search-row #loadOptionsButton {
+  width: 38px;
+  height: 38px;
 }
 
 /* ===== 搜索框 ===== */
@@ -385,18 +400,16 @@ h1 {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  transition:
-    transform var(--transition-fast),
-    opacity var(--transition-fast);
+  transition: filter var(--transition-fast);
   position: relative;
 }
 
 .btn:hover {
-  transform: translateY(-1px);
+  filter: brightness(1.08);
 }
 
 .btn:active {
-  transform: translateY(0);
+  filter: brightness(0.94);
 }
 
 .btn.primary {

@@ -12,6 +12,7 @@ export default [
         document: "readonly",
         navigator: "readonly",
         localStorage: "readonly",
+        matchMedia: "readonly",
         console: "readonly",
         setTimeout: "readonly",
         clearTimeout: "readonly",

@@ -10,6 +10,7 @@ import {
   makeBookmarkFilename,
 } from "./js/exporter.js";
 import { applyStaticTexts, t, toggleLanguage } from "./js/i18n.js";
+import { createThemeIcon, cycleTheme, getTheme } from "./js/theme.js";
 import { createBookmarkTree } from "./js/tree.js";
 
 const OPTIONS_STORAGE_KEY = "bookmarksPortalOptions";
@@ -29,6 +30,7 @@ document.addEventListener("DOMContentLoaded", init);
 function init() {
   cacheDom();
   applyStaticTexts(document);
+  updateThemeButton();
   bindEvents();
   loadBookmarks();
 }
@@ -41,6 +43,7 @@ function cacheDom() {
     "deselectAll",
     "exportButton",
     "languageToggle",
+    "themeToggle",
     "loadOptionsButton",
     "statusBar",
     "selectionCount",
@@ -60,10 +63,16 @@ function bindEvents() {
     applyStaticTexts(document);
     tree?.refreshLanguage();
     updateSelectionCount();
+    updateThemeButton();
     // applyStaticTexts 会重置按钮文案，导出期间需要恢复 loading 文案
     if (dom.exportButton.disabled) {
       dom.exportButton.textContent = t("exporting");
     }
+  });
+
+  dom.themeToggle.addEventListener("click", () => {
+    cycleTheme();
+    updateThemeButton();
   });
 
   let debounceTimer = null;
@@ -97,6 +106,17 @@ async function loadBookmarks() {
     console.error("Failed to load bookmarks:", error);
     showStatus("loadFailed");
   }
+}
+
+/**
+ * 刷新主题按钮的图标与无障碍文案。
+ */
+function updateThemeButton() {
+  const mode = getTheme();
+  const labelKey = { system: "themeSystem", light: "themeLight", dark: "themeDark" }[mode];
+  dom.themeToggle.replaceChildren(createThemeIcon(mode));
+  dom.themeToggle.setAttribute("aria-label", t(labelKey));
+  dom.themeToggle.setAttribute("title", t(labelKey));
 }
 
 /**
