@@ -84,6 +84,8 @@ describe("filterTreeBySelection", () => {
     assert.deepEqual(link.icon, [
       "https://www.google.com/s2/favicons?domain=bangumi.tv",
       "https://favicon.im/bangumi.tv",
+      "https://icons.duckduckgo.com/ip3/bangumi.tv.ico",
+      "https://bangumi.tv/favicon.ico",
     ]);
     assert.ok(Number.isInteger(link.addDate));
   });
