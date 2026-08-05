@@ -30,7 +30,7 @@ const translations = {
     selectedCount: (folders, links) => `已选 ${folders} 个文件夹、${links} 个链接`,
   },
   en: {
-    title: "Select Bookmarks to Export",
+    title: "Select Bookmarks",
     selectAll: "Select All",
     deselectAll: "Deselect All",
     exportButton: "Transmit !!",
