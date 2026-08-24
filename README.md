@@ -51,4 +51,3 @@ npm run verify     # 完整验证链（CI 同款）
 
 CI 推送 main 后自动发布滚动预览版（tag `latest`）；推送 `v*` 标签（需与 manifest 版本一致）自动发布正式版，同时附带 Chrome 与 Firefox 两个安装包及 SHA256 校验文件。
 
-> 发布 Firefox 渠道前请做一次人工冒烟：在 `about:debugging` 加载 `dist/firefox`，执行一次导出并确认 `bookmarks⏰*.json` 与 `structure.json` 两个文件均成功下载（双文件错峰下载依赖弹窗生命周期，静态检查无法覆盖）。
