@@ -131,6 +131,31 @@ describe("createBookmarkTree", () => {
     assert.equal(checkboxOf(tree, "2").indeterminate, false);
   });
 
+  it("applyUncheckedIds keeps new bookmarks unchecked inside an excluded folder", () => {
+    const data = makeData();
+    data[1].children.push({ id: "21", title: "新书签", url: "https://new.example.com/" });
+    const tree = createBookmarkTree(data, { t, onSelectionChange: () => {} });
+
+    // 「2」在上次保存时被整体取消；新增的「21」不在快照中，也应保持未勾选。
+    tree.applyUncheckedIds(["2", "20"]);
+    assert.equal(checkboxOf(tree, "2").checked, false);
+    assert.equal(checkboxOf(tree, "2").indeterminate, false);
+    assert.equal(checkboxOf(tree, "20").checked, false);
+    assert.equal(checkboxOf(tree, "21").checked, false);
+  });
+
+  it("applyUncheckedIds keeps new bookmarks checked outside excluded folders", () => {
+    const data = makeData();
+    data[0].children[0].children.push({ id: "102", title: "新书签", url: "https://new.example.com/" });
+    const tree = createBookmarkTree(data, { t, onSelectionChange: () => {} });
+
+    // 「10」上次为半选，不在 uncheckedIds 中；新增的「102」应默认勾选。
+    tree.applyUncheckedIds(["100", "20"]);
+    assert.equal(checkboxOf(tree, "102").checked, true);
+    assert.equal(checkboxOf(tree, "10").indeterminate, true);
+    assert.equal(checkboxOf(tree, "1").indeterminate, true);
+  });
+
   it("搜索过滤：匹配项及其祖先可见，清空后精确还原展开状态", () => {
     const { tree } = makeTree();
     const acg = tree.element

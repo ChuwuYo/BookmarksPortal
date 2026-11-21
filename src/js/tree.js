@@ -335,7 +335,8 @@ function createBookmarkTree(nodes, { t, onSelectionChange }) {
     },
 
     /**
-     * 恢复上次选择：先全选，再取消记录的未勾选项，最后自底向上重算三态。
+     * 恢复上次选择：先全选，再应用已记录的未勾选项，最后自底向上重算三态。
+     * 未勾选的文件夹会级联到整棵子树，使恢复后新增的子节点也保持未勾选。
      * @param {string[]} uncheckedIds
      */
     applyUncheckedIds(uncheckedIds) {
@@ -344,9 +345,9 @@ function createBookmarkTree(nodes, { t, onSelectionChange }) {
         setSubtreeChecked(model, true);
       }
       for (const model of allNodes) {
-        if (uncheckedSet.has(model.id)) {
-          model.checkbox.checked = false;
-        }
+        if (!uncheckedSet.has(model.id)) continue;
+        if (model.isFolder) setSubtreeChecked(model, false);
+        else model.checkbox.checked = false;
       }
       // allNodes 按先序排列，反向遍历即自底向上
       for (let i = allNodes.length - 1; i >= 0; i--) {
