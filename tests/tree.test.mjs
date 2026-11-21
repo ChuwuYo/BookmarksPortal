@@ -146,7 +146,11 @@ describe("createBookmarkTree", () => {
 
   it("applyUncheckedIds keeps new bookmarks checked outside excluded folders", () => {
     const data = makeData();
-    data[0].children[0].children.push({ id: "102", title: "新书签", url: "https://new.example.com/" });
+    data[0].children[0].children.push({
+      id: "102",
+      title: "新书签",
+      url: "https://new.example.com/",
+    });
     const tree = createBookmarkTree(data, { t, onSelectionChange: () => {} });
 
     // 「10」上次为半选，不在 uncheckedIds 中；新增的「102」应默认勾选。
