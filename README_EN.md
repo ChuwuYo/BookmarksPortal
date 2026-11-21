@@ -20,7 +20,7 @@
 
 - Export browser bookmarks as JSON files (with a companion structure.json index file)
 - Chinese/English interface with persistent language choice
-- Bookmark tree search, tri-state checkbox cascading, remember last selection
+- Bookmark tree search, tri-state checkbox cascading, remember last selection (saved on export, restored manually; new bookmarks selected by default, except in fully excluded folders)
 - Supports Chrome and Firefox browsers (single codebase build)
 - Dark mode support, lightweight and fast
 
@@ -38,7 +38,7 @@ Single source of truth lives in `src/`, built into per-browser artifacts:
 ```bash
 npm install        # Install dev dependencies
 npm run build      # Build dist/chrome and dist/firefox
-npm test           # Run export-format contract tests
+npm test           # Run tests
 npm run lint       # ESLint
 npm run format     # Prettier
 npm run pack       # Pack both browser zips into dist/artifacts (with SHA256)

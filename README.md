@@ -20,7 +20,7 @@
 
 - 将浏览器书签导出为JSON文件（同时生成配套的 structure.json 目录结构文件）
 - 中英文界面切换，选择持久化
-- 书签树搜索过滤、三态勾选联动、记住上次选择
+- 书签树搜索过滤、三态勾选联动、记住上次选择（导出时保存、手动恢复；新增书签默认勾选，已整体排除文件夹内除外）
 - 支持Chrome和Firefox浏览器（单一源码构建）
 - 暗色模式适配，轻量且快速
 
@@ -38,7 +38,7 @@
 ```bash
 npm install        # 安装开发依赖
 npm run build      # 构建 dist/chrome 与 dist/firefox
-npm test           # 运行导出格式契约测试
+npm test           # 运行测试
 npm run lint       # ESLint 检查
 npm run format     # Prettier 格式化
 npm run pack       # 打包双浏览器 zip 到 dist/artifacts（含 SHA256）
