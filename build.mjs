@@ -76,7 +76,7 @@ if (isDirectRun()) {
   try {
     await buildTargets(targets);
   } catch (error) {
-    console.error(error.message);
+    console.error(error?.stack ?? error);
     process.exit(1);
   }
 }

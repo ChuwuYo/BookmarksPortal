@@ -8,5 +8,5 @@
     "strict": false,
     "lib": ["ES2022", "DOM", "DOM.Iterable"]
   },
-  "include": ["src/**/*.js", "scripts/**/*.mjs", "build.mjs", "tests/**/*.mjs"]
+  "include": ["src/**/*.js", "src/js/globals.d.ts", "scripts/**/*.mjs", "build.mjs", "tests/**/*.mjs"]
 }

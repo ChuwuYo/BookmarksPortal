@@ -26,7 +26,7 @@ const FAVICON_PROVIDERS = [
 ];
 
 const PRIVATE_IPV4_RE =
-  /^(?:127\.|10\.|192\.168\.|169\.254\.|0\.|172\.(?:1[6-9]|2\d|3[01])\.)\d+(?:\.\d+)*$/;
+  /^(?:127\.|10\.|192\.168\.|169\.254\.|0\.|100\.(?:6[4-9]|[7-9]\d|1[01]\d|12[0-7])\.|172\.(?:1[6-9]|2\d|3[01])\.)\d+(?:\.\d+)*$/;
 
 /**
  * 判断主机名是否属于本地或私网地址（不应泄露给公网第三方 Favicon 服务）。
@@ -35,7 +35,13 @@ const PRIVATE_IPV4_RE =
  */
 function isLocalOrPrivateHost(hostname) {
   if (!hostname) return true;
-  if (hostname === "localhost" || hostname.endsWith(".localhost") || hostname.endsWith(".local")) {
+  if (
+    hostname === "localhost" ||
+    hostname.endsWith(".localhost") ||
+    hostname.endsWith(".local") ||
+    hostname === "home.arpa" ||
+    hostname.endsWith(".home.arpa")
+  ) {
     return true;
   }
   // IPv6 字面量（如 [::1]、[fe80::1]）或无点号的内网单标签主机名（如 intranet）
@@ -54,7 +60,7 @@ function extractHostname(url) {
   try {
     const parsed = new URL(url);
     if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return "";
-    const hostname = parsed.hostname.toLowerCase();
+    const hostname = parsed.hostname.toLowerCase().replace(/\.+$/, "");
     return isLocalOrPrivateHost(hostname) ? "" : hostname;
   } catch {
     return "";

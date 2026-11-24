@@ -179,6 +179,14 @@ describe("filterTreeBySelection", () => {
     }
     assert.equal(extractHostname("https://GitHub.com/ChuwuYo"), "github.com");
     assert.equal(buildIconList("https://github.com/ChuwuYo").length, 4);
+    assert.equal(extractHostname("http://172.15.0.1/"), "172.15.0.1");
+    assert.equal(extractHostname("http://172.32.0.1/"), "172.32.0.1");
+    assert.equal(extractHostname("http://169.254.1.1/"), "");
+    assert.equal(extractHostname("http://0.0.0.0/"), "");
+    assert.equal(extractHostname("http://100.64.0.1/"), "");
+    assert.equal(extractHostname("http://intranet/"), "");
+    assert.equal(extractHostname("http://printer.home.arpa/"), "");
+    assert.equal(extractHostname("http://localhost./"), "");
   });
 
   it("选中的空文件夹以 children:[] 保留", () => {

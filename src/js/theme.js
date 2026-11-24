@@ -8,6 +8,7 @@ import { STORAGE_KEYS, readStorage, writeStorage } from "./storage.js";
 import { createSvgIcon } from "./svg.js";
 
 const MODES = ["system", "light", "dark"];
+/** 必须与 theme-init.js、popup.html meta[name="theme-color"] 及 popup.css --color-primary/--color-surface 保持一致 */
 const THEME_COLORS = { light: "#58505b", dark: "#191b1d" };
 
 const darkMedia =
@@ -91,4 +92,4 @@ function createThemeIcon(mode) {
 // 浏览器环境导入时同步主题（首帧由 head 内 theme-init.js 抢先应用）
 applyTheme(getTheme());
 
-export { MODES, applyTheme, createThemeIcon, cycleTheme, getTheme, isDarkMode };
+export { MODES, THEME_COLORS, applyTheme, createThemeIcon, cycleTheme, getTheme, isDarkMode };

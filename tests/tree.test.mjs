@@ -1,6 +1,6 @@
 /**
  * 书签树组件交互冒烟测试（jsdom）。
- * 覆盖三态级联、勾选收集、选择恢复、搜索过滤、事件委托、空标题回退、缩进上限与搜索态全选。
+ * 覆盖三态级联、勾选收集、选择恢复、搜索过滤、事件委托（含键盘导航）、空标题回退、缩进上限与搜索态全选。
  */
 
 import assert from "node:assert/strict";
@@ -65,6 +65,10 @@ function change(checkbox) {
   checkbox.dispatchEvent(new dom.window.Event("change", { bubbles: true }));
 }
 
+function pressKey(target, key) {
+  target.dispatchEvent(new dom.window.KeyboardEvent("keydown", { key, bubbles: true }));
+}
+
 describe("createBookmarkTree", () => {
   it("渲染全部节点并正确标记类型与无障碍层级", () => {
     const { tree } = makeTree();
@@ -116,7 +120,7 @@ describe("createBookmarkTree", () => {
     assert.equal(checkboxOf(tree, "1").indeterminate, true);
   });
 
-  it("setAllChecked 非搜索态全选/全不选，搜索态仅作用于匹配项", () => {
+  it("setAllChecked 非搜索态全选/全不选，搜索态仅作用于匹配项且不级联隐藏后代", () => {
     const { tree } = makeTree();
     tree.setAllChecked(true);
     assert.equal(tree.getCheckedCounts().folders, 3);
@@ -127,14 +131,15 @@ describe("createBookmarkTree", () => {
     assert.equal(tree.getCheckedCounts().folders, 0);
     assert.equal(tree.getUncheckedIds().length, 7);
 
-    // 搜索仅命中 Bangumi (100)，此时全选仅勾选 100 而不勾选 101/11/20
-    tree.filter("bangumi");
+    // 搜索仅命中文件夹 ACG (10)，全选仅勾选 10 本身而不级联隐藏子项 100/101
+    tree.filter("ACG");
     assert.equal(tree.isFiltered(), true);
     tree.setAllChecked(true);
-    assert.equal(checkboxOf(tree, "100").checked, true);
+    assert.equal(checkboxOf(tree, "10").checked, true);
+    assert.equal(checkboxOf(tree, "100").checked, false);
     assert.equal(checkboxOf(tree, "101").checked, false);
     assert.equal(checkboxOf(tree, "20").checked, false);
-    assert.equal(checkboxOf(tree, "10").indeterminate, true);
+    assert.equal(checkboxOf(tree, "1").indeterminate, true);
   });
 
   it("applyUncheckedIds 恢复三态：全选后取消指定项", () => {
@@ -198,6 +203,32 @@ describe("createBookmarkTree", () => {
     tree.filter("");
     assert.equal(acgChildren.hidden, true);
     assert.equal(test20.hidden, false);
+  });
+
+  it("键盘方向键导航：跳过折叠子节点，支持 ArrowRight 展开与 ArrowLeft 收起/回退", () => {
+    const { tree } = makeTree();
+    dom.window.document.body.replaceChildren(tree.element);
+
+    const cb1 = checkboxOf(tree, "1");
+    const cb2 = checkboxOf(tree, "2");
+    const cb10 = checkboxOf(tree, "10");
+
+    // 初始全部折叠：在 1 上按 ArrowDown 应跳过折叠的子节点直接聚焦到 2
+    cb1.focus();
+    pressKey(cb1, "ArrowDown");
+    assert.equal(dom.window.document.activeElement, cb2);
+
+    // 按 ArrowUp 回到 1，再按 ArrowRight 展开 1，再按 ArrowRight 聚焦第一个子节点 10
+    pressKey(cb2, "ArrowUp");
+    assert.equal(dom.window.document.activeElement, cb1);
+    pressKey(cb1, "ArrowRight");
+    assert.equal(cb1.closest(".bookmark-node").getAttribute("aria-expanded"), "true");
+    pressKey(cb1, "ArrowRight");
+    assert.equal(dom.window.document.activeElement, cb10);
+
+    // 在折叠的子文件夹 10 上按 ArrowLeft 应回到父节点 1
+    pressKey(cb10, "ArrowLeft");
+    assert.equal(dom.window.document.activeElement, cb1);
   });
 
   it("空标题书签回退显示 URL 或无标题占位，且深层缩进有上限封顶", () => {

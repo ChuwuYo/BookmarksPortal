@@ -1,6 +1,8 @@
 /**
  * 首帧主题同步初始化脚本（在 <head> 中同步执行，彻底消除暗色模式 FOUC）。
  * 保持极简非 module 脚本以兼容 MV3 CSP (script-src 'self')。
+ * 键名须与 src/js/storage.js 的 STORAGE_KEYS.THEME 保持一致；
+ * 配色须与 src/js/theme.js 的 THEME_COLORS 保持一致（由 tests/theme.test.mjs 自动校验）。
  */
 (function initThemeBeforePaint() {
   let mode = "system";

@@ -436,16 +436,12 @@ function createBookmarkTree(nodes, { t, onSelectionChange }) {
     setAllChecked(checked) {
       if (filterActive) {
         for (const model of lastMatchSet) {
-          if (model.isFolder) {
-            setSubtreeChecked(model, checked);
-          } else {
-            model.checkbox.checked = checked;
-            model.checkbox.indeterminate = false;
-          }
+          model.checkbox.checked = checked;
+          model.checkbox.indeterminate = false;
         }
         for (let i = allNodes.length - 1; i >= 0; i--) {
           const model = allNodes[i];
-          if (model.isFolder) recomputeFromChildren(model);
+          if (model.isFolder && !lastMatchSet.has(model)) recomputeFromChildren(model);
         }
       } else {
         for (const model of rootModels) {

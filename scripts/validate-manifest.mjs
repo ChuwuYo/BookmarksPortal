@@ -61,7 +61,9 @@ for (const [name, manifest] of [
   // 引用的图标（顶层 icons 与 action.default_icon）必须全部存在于 src/
   const iconEntries = [
     ...Object.values(manifest.icons ?? {}),
-    ...Object.values(manifest.action?.default_icon ?? {}),
+    ...(typeof manifest.action?.default_icon === "string"
+      ? [manifest.action.default_icon]
+      : Object.values(manifest.action?.default_icon ?? {})),
   ];
   check(iconEntries.length > 0, `${name}: 缺少图标配置`);
   for (const iconPath of new Set(iconEntries)) {
@@ -82,13 +84,14 @@ for (const [name, manifest] of [
 
 // ---- 浏览器专属 ----
 check(
-  typeof chrome.minimum_chrome_version === "string" && /^\d+$/.test(chrome.minimum_chrome_version),
+  typeof chrome.minimum_chrome_version === "string" &&
+    /^\d+(?:\.\d+)*$/.test(chrome.minimum_chrome_version),
   "chrome: 缺少合法的 minimum_chrome_version"
 );
 check(typeof firefox.browser_specific_settings?.gecko?.id === "string", "firefox: 缺少 gecko id");
 check(
   typeof firefox.browser_specific_settings?.gecko?.strict_min_version === "string" &&
-    /^\d+\.\d+$/.test(firefox.browser_specific_settings.gecko.strict_min_version),
+    /^\d+(?:\.\d+)*$/.test(firefox.browser_specific_settings.gecko.strict_min_version),
   "firefox: 缺少合法的 gecko.strict_min_version"
 );
 check(!("browser_specific_settings" in chrome), "chrome: 不应包含 browser_specific_settings");

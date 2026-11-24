@@ -247,7 +247,7 @@ function createPopupController(deps = {}) {
     if (isExporting) return;
 
     if (!tree) {
-      showStatus("noBookmarks");
+      showStatus("noBookmarks", { persist: true });
       return;
     }
 

@@ -42,7 +42,7 @@ function writeStorage(key, value) {
 /**
  * 读取并解析 JSON 值；区分「未存储」与「解析失败」。
  * @param {string} key
- * @returns {{ ok: true, value: any } | { ok: false, error: Error }}
+ * @returns {{ ok: true, value: any } | { ok: false, error: any }}
  */
 function readJsonStorage(key) {
   try {
@@ -56,14 +56,16 @@ function readJsonStorage(key) {
 }
 
 /**
- * 序列化并写入 JSON 值。
+ * 序列化并写入 JSON 值（不可序列化为 JSON 的值如 undefined 返回 false）。
  * @param {string} key
  * @param {*} value
  * @returns {boolean}
  */
 function writeJsonStorage(key, value) {
   try {
-    return writeStorage(key, JSON.stringify(value));
+    const serialized = JSON.stringify(value);
+    if (serialized === undefined) return false;
+    return writeStorage(key, serialized);
   } catch {
     return false;
   }

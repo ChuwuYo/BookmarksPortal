@@ -58,6 +58,7 @@ function makeFakeDocument() {
 function makeStubTree({ selected = ["1", "10"], filtered = false, matchCount = 1 } = {}) {
   let isFiltered = filtered;
   let filterCalls = 0;
+  let refreshCalls = 0;
   return {
     element: {},
     isFiltered: () => isFiltered,
@@ -67,13 +68,24 @@ function makeStubTree({ selected = ["1", "10"], filtered = false, matchCount = 1
       return q.trim() ? matchCount : 2;
     },
     getFilterCalls: () => filterCalls,
+    getRefreshCalls: () => refreshCalls,
     getSelection: () => ({ selectedIds: new Set(selected), indeterminateIds: new Set() }),
     getCheckedCounts: () => ({ folders: 1, links: 1 }),
     getUncheckedIds: () => ["99"],
     setAllChecked: () => {},
     applyUncheckedIds: () => {},
-    refreshLanguage: () => {},
+    refreshLanguage: () => {
+      refreshCalls++;
+    },
   };
+}
+
+async function waitUntil(predicate, timeoutMs = 1000) {
+  const deadline = Date.now() + timeoutMs;
+  while (!predicate()) {
+    if (Date.now() >= deadline) throw new Error("waitUntil timed out");
+    await new Promise((r) => setTimeout(r, 10));
+  }
 }
 
 const t = (key) => (key === "selectedCount" ? (f, l) => `${f}:${l}` : key);
@@ -82,15 +94,14 @@ describe("createPopupController", () => {
   it("首帧无搜索词时不执行冗余 tree.filter，且搜索无匹配时状态栏常驻", async () => {
     const doc = makeFakeDocument();
     const stubTree = makeStubTree({ matchCount: 0 });
+    const root = [{ id: "0", children: [{ id: "1", title: "Bar", children: [] }] }];
     const controller = createPopupController({
       document: doc,
       t,
       applyStaticTexts: () => {},
       createThemeIcon: () => ({}),
       getTheme: () => "system",
-      getBookmarkTree: async () => [
-        { id: "0", children: [{ id: "1", title: "Bar", children: [] }] },
-      ],
+      getBookmarkTree: async () => root,
       createBookmarkTree: () => stubTree,
       statusClearMs: 50,
     });
@@ -116,15 +127,14 @@ describe("createPopupController", () => {
   it("applyFilter 不会误清除非搜索类的状态提示（如 loaded）", async () => {
     const doc = makeFakeDocument();
     const stubTree = makeStubTree({ matchCount: 1 });
+    const root = [{ id: "0", children: [{ id: "1", title: "Bar", children: [] }] }];
     const controller = createPopupController({
       document: doc,
       t,
       applyStaticTexts: () => {},
       createThemeIcon: () => ({}),
       getTheme: () => "system",
-      getBookmarkTree: async () => [
-        { id: "0", children: [{ id: "1", title: "Bar", children: [] }] },
-      ],
+      getBookmarkTree: async () => root,
       createBookmarkTree: () => stubTree,
       readOptions: () => ({ ok: true, value: { uncheckedIds: [] } }),
       statusClearMs: 5000,
@@ -172,7 +182,8 @@ describe("createPopupController", () => {
     await controller.exportSelectedBookmarks();
     assert.equal(savedCount, 0);
     assert.equal(doc.elements.get("statusBar").textContent, "exportError");
-    await new Promise((r) => setTimeout(r, 70));
+    await waitUntil(() => !controller.getState().isExporting);
+    controller.hideStatus();
   });
 
   it("导出成功时顺序保存配置并下载书签与 structure.json", async () => {
@@ -217,12 +228,52 @@ describe("createPopupController", () => {
     assert.equal(controller.getState().isExporting, true);
     await controller.exportSelectedBookmarks();
 
-    await new Promise((r) => setTimeout(r, 40));
+    await waitUntil(() => !controller.getState().isExporting);
     assert.equal(downloads.length, 2);
     assert.match(downloads[0].filename, /^bookmarks⏰\d{4}-\d{2}-\d{2}\.json$/);
     assert.equal(downloads[1].filename, "structure.json");
     assert.deepEqual(savedPayload.uncheckedIds, ["99"]);
-    assert.equal(controller.getState().isExporting, false);
     controller.hideStatus();
+  });
+
+  it("语言切换联动刷新静态文本、树文案与常驻状态提示", async () => {
+    const doc = makeFakeDocument();
+    const stubTree = makeStubTree({ matchCount: 0 });
+    let lang = "zh";
+    let staticApplies = 0;
+    const tr = (key) => {
+      if (key === "selectedCount") return (f, l) => `${lang}:${f}:${l}`;
+      return `${lang}:${key}`;
+    };
+
+    const controller = createPopupController({
+      document: doc,
+      t: tr,
+      toggleLanguage: () => {
+        lang = lang === "zh" ? "en" : "zh";
+        return lang;
+      },
+      applyStaticTexts: () => {
+        staticApplies++;
+      },
+      createThemeIcon: () => ({}),
+      getTheme: () => "system",
+      getBookmarkTree: async () => [
+        { id: "0", children: [{ id: "1", title: "Bar", children: [] }] },
+      ],
+      createBookmarkTree: () => stubTree,
+    });
+
+    await controller.init();
+    doc.elements.get("searchInput").value = "missing";
+    controller.applyFilter();
+    assert.equal(doc.elements.get("statusBar").textContent, "zh:noMatch");
+
+    doc.elements.get("languageToggle").trigger("click");
+    assert.equal(staticApplies, 2);
+    assert.equal(stubTree.getRefreshCalls(), 1);
+    assert.equal(doc.elements.get("statusBar").textContent, "en:noMatch");
+    assert.equal(doc.elements.get("selectionCount").textContent, "en:1:1");
+    assert.equal(controller.getState().lastStatusPersist, true);
   });
 });
