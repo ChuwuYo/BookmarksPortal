@@ -19,20 +19,43 @@
  * 消费端 ChuwuBookmarks 会把 favicon.im 自动提到最前（其网络可达性最好）。
  */
 const FAVICON_PROVIDERS = [
-  (hostname) => `https://www.google.com/s2/favicons?domain=${hostname}`,
-  (hostname) => `https://favicon.im/${hostname}`,
-  (hostname) => `https://icons.duckduckgo.com/ip3/${hostname}.ico`,
+  (hostname) => `https://www.google.com/s2/favicons?domain=${encodeURIComponent(hostname)}`,
+  (hostname) => `https://favicon.im/${encodeURIComponent(hostname)}`,
+  (hostname) => `https://icons.duckduckgo.com/ip3/${encodeURIComponent(hostname)}.ico`,
   (hostname) => `https://${hostname}/favicon.ico`,
 ];
 
+const PRIVATE_IPV4_RE =
+  /^(?:127\.|10\.|192\.168\.|169\.254\.|0\.|172\.(?:1[6-9]|2\d|3[01])\.)\d+(?:\.\d+)*$/;
+
 /**
- * 从 URL 中提取合法 hostname，失败返回空字符串。
+ * 判断主机名是否属于本地或私网地址（不应泄露给公网第三方 Favicon 服务）。
+ * @param {string} hostname
+ * @returns {boolean}
+ */
+function isLocalOrPrivateHost(hostname) {
+  if (!hostname) return true;
+  if (hostname === "localhost" || hostname.endsWith(".localhost") || hostname.endsWith(".local")) {
+    return true;
+  }
+  // IPv6 字面量（如 [::1]、[fe80::1]）或无点号的内网单标签主机名（如 intranet）
+  if (hostname.startsWith("[") || !hostname.includes(".")) {
+    return true;
+  }
+  return PRIVATE_IPV4_RE.test(hostname);
+}
+
+/**
+ * 从 URL 中提取适合查询公网 Favicon 的合法 HTTP(S) hostname，非法或本地/内网地址返回空字符串。
  * @param {string} url
  * @returns {string}
  */
 function extractHostname(url) {
   try {
-    return new URL(url).hostname;
+    const parsed = new URL(url);
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return "";
+    const hostname = parsed.hostname.toLowerCase();
+    return isLocalOrPrivateHost(hostname) ? "" : hostname;
   } catch {
     return "";
   }
@@ -63,6 +86,49 @@ function normalizeAddDate(value, fallback) {
 }
 
 /**
+ * 单趟后序递归转换单个节点为导出格式，未入选返回 null。
+ * 每个节点严格仅访问一次，避免先探测后转换导致的重复递归。
+ * @param {Object} node
+ * @param {Set<string>} selectedIds
+ * @param {Set<string>} indeterminateIds
+ * @param {number} now
+ * @param {boolean} [forceFolder=false]
+ * @returns {Object|null}
+ */
+function processNode(node, selectedIds, indeterminateIds, now, forceFolder = false) {
+  if (!forceFolder && node.url) {
+    if (!selectedIds.has(node.id)) return null;
+    return {
+      type: "link",
+      addDate: normalizeAddDate(node.dateAdded, now),
+      title: node.title ?? "",
+      url: node.url,
+      icon: buildIconList(node.url),
+    };
+  }
+
+  if (forceFolder || Array.isArray(node.children)) {
+    const rawChildren = Array.isArray(node.children) ? node.children : [];
+    const processedChildren = [];
+    for (const child of rawChildren) {
+      const converted = processNode(child, selectedIds, indeterminateIds, now);
+      if (converted) processedChildren.push(converted);
+    }
+
+    if (processedChildren.length > 0 || selectedIds.has(node.id) || indeterminateIds.has(node.id)) {
+      return {
+        type: "folder",
+        addDate: normalizeAddDate(node.dateAdded, now),
+        title: node.title ?? "",
+        children: processedChildren,
+      };
+    }
+  }
+
+  return null;
+}
+
+/**
  * 按勾选状态过滤并转换书签树，生成导出数据。
  *
  * 节点入选条件（与历史版本语义一致，顶级与嵌套文件夹规则相同）：
@@ -80,80 +146,11 @@ function filterTreeBySelection(rootChildren, selectedIds, indeterminateIds, now 
   const exportData = [];
 
   for (const rootFolder of rootChildren) {
-    const children = Array.isArray(rootFolder.children) ? rootFolder.children : [];
-    const processedChildren = children
-      .filter((child) => isIncluded(child, selectedIds, indeterminateIds))
-      .map((child) => processNode(child, selectedIds, indeterminateIds, now))
-      .filter(Boolean);
-
-    // 与嵌套文件夹一致：被勾选/半选的顶级文件夹即使无入选子项也保留
-    if (
-      processedChildren.length > 0 ||
-      selectedIds.has(rootFolder.id) ||
-      indeterminateIds.has(rootFolder.id)
-    ) {
-      exportData.push({
-        type: "folder",
-        addDate: normalizeAddDate(rootFolder.dateAdded, now),
-        title: rootFolder.title ?? "",
-        children: processedChildren,
-      });
-    }
+    const converted = processNode(rootFolder, selectedIds, indeterminateIds, now, true);
+    if (converted) exportData.push(converted);
   }
 
   return exportData;
-}
-
-/**
- * 节点是否入选（自身勾选/半选，或有入选后代）。
- */
-function isIncluded(node, selectedIds, indeterminateIds) {
-  return (
-    selectedIds.has(node.id) ||
-    indeterminateIds.has(node.id) ||
-    hasIncludedDescendants(node, selectedIds, indeterminateIds)
-  );
-}
-
-/**
- * 是否存在入选的后代节点。
- */
-function hasIncludedDescendants(node, selectedIds, indeterminateIds) {
-  if (!Array.isArray(node.children)) return false;
-  return node.children.some((child) => isIncluded(child, selectedIds, indeterminateIds));
-}
-
-/**
- * 转换单个节点为导出格式，未入选返回 null。
- */
-function processNode(node, selectedIds, indeterminateIds, now) {
-  if (node.url) {
-    return {
-      type: "link",
-      addDate: normalizeAddDate(node.dateAdded, now),
-      title: node.title ?? "",
-      url: node.url,
-      icon: buildIconList(node.url),
-    };
-  }
-
-  if (Array.isArray(node.children)) {
-    const processedChildren = node.children
-      .filter((child) => isIncluded(child, selectedIds, indeterminateIds))
-      .map((child) => processNode(child, selectedIds, indeterminateIds, now))
-      .filter(Boolean);
-
-    if (processedChildren.length > 0 || selectedIds.has(node.id) || indeterminateIds.has(node.id)) {
-      return {
-        type: "folder",
-        addDate: normalizeAddDate(node.dateAdded, now),
-        title: node.title ?? "",
-        children: processedChildren,
-      };
-    }
-  }
-
-  return null;
 }
 
 /**
@@ -175,16 +172,23 @@ function generateStructure(nodes, parentPath = "") {
     const pathId = parentPath ? `${parentPath}_${index}` : `${index}`;
     const children = Array.isArray(node.children) ? node.children : [];
 
+    let linkCount = 0;
+    let folderCount = 0;
+    for (const c of children) {
+      if (c.type === "link") linkCount++;
+      else if (c.type === "folder") folderCount++;
+    }
+
     const folderInfo = {
       id: pathId,
       title: node.title,
       addDate: node.addDate,
-      linkCount: children.filter((c) => c.type === "link").length,
-      folderCount: children.filter((c) => c.type === "folder").length,
+      linkCount,
+      folderCount,
       hasChildren: children.length > 0,
     };
 
-    if (children.some((c) => c.type === "folder")) {
+    if (folderCount > 0) {
       folderInfo.children = generateStructure(children, pathId);
     }
 
@@ -225,7 +229,9 @@ const STRUCTURE_FILENAME = "structure.json";
 
 export {
   STRUCTURE_FILENAME,
+  buildIconList,
   buildStructureFile,
+  extractHostname,
   filterTreeBySelection,
   generateStructure,
   makeBookmarkFilename,

@@ -11,8 +11,8 @@
  * 注意：字体子集化依赖 devDependencies（subset-font），需先 npm install。
  */
 
-import { cpSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
-import { basename, dirname, join } from "node:path";
+import { cpSync, mkdirSync, readFileSync, realpathSync, rmSync, writeFileSync } from "node:fs";
+import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { SUBSET_FONT_NAME, buildSubsetFont } from "./scripts/subset-font.mjs";
 
@@ -22,39 +22,63 @@ const DIST_DIR = join(ROOT, "dist");
 
 const TARGETS = ["chrome", "firefox"];
 
-const requested = process.argv.slice(2);
-const targets = requested.length > 0 ? requested : TARGETS;
+/**
+ * 构建指定浏览器目标。
+ * @param {string[]} [targets=TARGETS]
+ */
+async function buildTargets(targets = TARGETS) {
+  // 先校验目标有效性，再做昂贵的字体子集化
+  for (const target of targets) {
+    if (!TARGETS.includes(target)) {
+      throw new Error(`Unknown target: ${target} (expected: ${TARGETS.join(", ")})`);
+    }
+  }
 
-// 先校验目标有效性，再做昂贵的字体子集化
-for (const target of targets) {
-  if (!TARGETS.includes(target)) {
-    console.error(`Unknown target: ${target} (expected: ${TARGETS.join(", ")})`);
+  // UI 字体子集：每次构建从当前文案现算字符集（文案变更自动同步）
+  const subsetFontBuffer = await buildSubsetFont();
+
+  for (const target of targets) {
+    const outDir = join(DIST_DIR, target);
+    rmSync(outDir, { recursive: true, force: true });
+    mkdirSync(outDir, { recursive: true });
+
+    // 拷贝共享资源（html/css/js/icons/fonts），排除点文件（.DS_Store 等）
+    cpSync(SRC_DIR, outDir, {
+      recursive: true,
+      filter: (source) => !basename(source).startsWith("."),
+    });
+
+    // 写入构建期生成的 UI 字体子集
+    mkdirSync(join(outDir, "fonts"), { recursive: true });
+    writeFileSync(join(outDir, "fonts", SUBSET_FONT_NAME), subsetFontBuffer);
+
+    // 写入浏览器专属 manifest（校验 JSON 合法性）
+    const manifestPath = join(ROOT, "manifests", `${target}.json`);
+    const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
+    writeFileSync(join(outDir, "manifest.json"), `${JSON.stringify(manifest, null, 2)}\n`);
+
+    console.log(`✔ Built ${target} -> ${join("dist", target)}`);
+  }
+}
+
+function isDirectRun() {
+  if (!process.argv[1]) return false;
+  try {
+    return realpathSync(fileURLToPath(import.meta.url)) === realpathSync(resolve(process.argv[1]));
+  } catch {
+    return fileURLToPath(import.meta.url) === resolve(process.argv[1]);
+  }
+}
+
+if (isDirectRun()) {
+  const requested = process.argv.slice(2);
+  const targets = requested.length > 0 ? requested : TARGETS;
+  try {
+    await buildTargets(targets);
+  } catch (error) {
+    console.error(error.message);
     process.exit(1);
   }
 }
 
-// UI 字体子集：每次构建从当前文案现算字符集（文案变更自动同步）
-const subsetFontBuffer = await buildSubsetFont();
-
-for (const target of targets) {
-  const outDir = join(DIST_DIR, target);
-  rmSync(outDir, { recursive: true, force: true });
-  mkdirSync(outDir, { recursive: true });
-
-  // 拷贝共享资源（html/css/js/icons/fonts），排除点文件（.DS_Store 等）
-  cpSync(SRC_DIR, outDir, {
-    recursive: true,
-    filter: (source) => !basename(source).startsWith("."),
-  });
-
-  // 写入构建期生成的 UI 字体子集
-  mkdirSync(join(outDir, "fonts"), { recursive: true });
-  writeFileSync(join(outDir, "fonts", SUBSET_FONT_NAME), subsetFontBuffer);
-
-  // 写入浏览器专属 manifest（校验 JSON 合法性）
-  const manifestPath = join(ROOT, "manifests", `${target}.json`);
-  const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
-  writeFileSync(join(outDir, "manifest.json"), `${JSON.stringify(manifest, null, 2)}\n`);
-
-  console.log(`✔ Built ${target} -> ${join("dist", target)}`);
-}
+export { DIST_DIR, TARGETS, buildTargets };

@@ -5,56 +5,41 @@
  * - 每个节点对应一个视图模型，复选框状态是唯一事实来源；
  *   三态联动通过父子引用沿树传播（下钻级联 + 向上重算），
  *   不做全文档 querySelectorAll 扫描。
- * - 展开状态记录在模型上，搜索过滤结束后可精确还原。
+ * - 事件统一委托到 rootEl（click / change / keydown），避免大书签库下创建数千监听器。
+ * - 展开状态记录在模型上，搜索过滤结束后可精确还原；搜索激活时全选/全不选仅作用于匹配项。
  */
 
-const SVG_NS = "http://www.w3.org/2000/svg";
+import { createSvgIcon } from "./svg.js";
 
-/**
- * 以 DOM API 构建 24x24 线性 SVG 图标（避免 innerHTML）。
- * @param {string[]} paths path 的 d 属性数组
- * @param {number} size
- * @param {number} strokeWidth
- */
-function createSvgIcon(paths, size, strokeWidth) {
-  const svg = document.createElementNS(SVG_NS, "svg");
-  svg.setAttribute("viewBox", "0 0 24 24");
-  svg.setAttribute("width", String(size));
-  svg.setAttribute("height", String(size));
-  svg.setAttribute("fill", "none");
-  svg.setAttribute("stroke", "currentColor");
-  svg.setAttribute("stroke-width", String(strokeWidth));
-  svg.setAttribute("stroke-linecap", "round");
-  svg.setAttribute("stroke-linejoin", "round");
-  svg.setAttribute("aria-hidden", "true");
-  for (const d of paths) {
-    const path = document.createElementNS(SVG_NS, "path");
-    path.setAttribute("d", d);
-    svg.appendChild(path);
-  }
-  return svg;
-}
+const MAX_INDENT_DEPTH = 8;
 
-const ICONS = {
-  chevron: () => createSvgIcon(["m9 18 6-6-6-6"], 14, 2.5),
-  folder: () =>
-    createSvgIcon(
+const ICON_TEMPLATES = {
+  chevron: null,
+  folder: null,
+  link: null,
+};
+
+function getIcon(type) {
+  if (!ICON_TEMPLATES.chevron) {
+    ICON_TEMPLATES.chevron = createSvgIcon(["m9 18 6-6-6-6"], 14, 2.5);
+    ICON_TEMPLATES.folder = createSvgIcon(
       [
         "M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z",
       ],
       15,
       2
-    ),
-  link: () =>
-    createSvgIcon(
+    );
+    ICON_TEMPLATES.link = createSvgIcon(
       [
         "M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71",
         "M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71",
       ],
       15,
       2
-    ),
-};
+    );
+  }
+  return ICON_TEMPLATES[type].cloneNode(true);
+}
 
 /**
  * @typedef {Object} TreeNodeModel
@@ -69,6 +54,7 @@ const ICONS = {
  * @property {HTMLDivElement} itemEl
  * @property {HTMLDivElement} headerEl
  * @property {HTMLInputElement} checkbox
+ * @property {HTMLSpanElement} titleEl
  * @property {HTMLButtonElement|null} toggleBtn
  * @property {HTMLDivElement|null} childrenEl
  */
@@ -77,7 +63,7 @@ const ICONS = {
  * 创建书签树组件。
  * @param {Array} nodes 浏览器书签节点数组（根级文件夹）
  * @param {Object} options
- * @param {(key:string)=>string} options.t 翻译函数
+ * @param {(key:string)=>any} options.t 翻译函数
  * @param {()=>void} options.onSelectionChange 勾选状态变化回调
  * @returns 组件句柄
  */
@@ -86,10 +72,37 @@ function createBookmarkTree(nodes, { t, onSelectionChange }) {
   rootEl.className = "tree-root";
   rootEl.setAttribute("role", "presentation");
 
+  /** @type {TreeNodeModel[]} */
   const allNodes = [];
+  /** @type {Map<string, TreeNodeModel>} */
+  const nodeMap = new Map();
   let idSeq = 0;
   /** 搜索过滤是否激活（激活期间展开操作只改视觉，不污染记忆的展开状态） */
   let filterActive = false;
+  /** @type {Set<TreeNodeModel>} 最近一次搜索命中的节点集合 */
+  let lastMatchSet = new Set();
+
+  /**
+   * 格式化节点展示文本（空标题时回退 URL 或本地化占位文本，不影响导出原始 title）。
+   */
+  function getDisplayTitle(model) {
+    if (model.title) return model.title;
+    if (model.url) return model.url;
+    const untitled = t("untitled");
+    return typeof untitled === "string" && untitled !== "untitled" ? untitled : "(Untitled)";
+  }
+
+  /**
+   * 构建文件夹展开/收起按钮的上下文无障碍标签。
+   */
+  function getToggleAriaLabel(model, expanded) {
+    const fnKey = expanded ? "collapseFolder" : "expandFolder";
+    const formatter = t(fnKey);
+    if (typeof formatter === "function") {
+      return formatter(getDisplayTitle(model));
+    }
+    return expanded ? t("collapse") : t("expand");
+  }
 
   /**
    * 是否为分隔符节点（Firefox 特有：无 url 且无 children）。
@@ -105,6 +118,7 @@ function createBookmarkTree(nodes, { t, onSelectionChange }) {
   function buildNode(data, parent, depth) {
     const isFolder = Array.isArray(data.children);
 
+    /** @type {TreeNodeModel} */
     const model = {
       id: String(data.id),
       title: data.title ?? "",
@@ -117,42 +131,36 @@ function createBookmarkTree(nodes, { t, onSelectionChange }) {
       itemEl: document.createElement("div"),
       headerEl: document.createElement("div"),
       checkbox: document.createElement("input"),
+      titleEl: document.createElement("span"),
       toggleBtn: null,
       childrenEl: null,
     };
     allNodes.push(model);
+    nodeMap.set(model.id, model);
 
     model.itemEl.className = "bookmark-node";
-    model.itemEl.setAttribute("role", "presentation");
+    model.itemEl.setAttribute("role", "treeitem");
+    model.itemEl.setAttribute("aria-level", String(depth + 1));
 
     // ---- 节点头部 ----
     const header = model.headerEl;
     header.className = "node-header";
-    header.setAttribute("role", "treeitem");
-    if (depth > 0) header.style.paddingInlineStart = `${depth * 16 + 8}px`;
+    const indentDepth = Math.min(depth, MAX_INDENT_DEPTH);
+    if (indentDepth > 0) header.style.paddingInlineStart = `${indentDepth * 16 + 8}px`;
 
     if (isFolder) {
       const groupId = `group-${idSeq++}`;
       const toggleBtn = document.createElement("button");
       toggleBtn.type = "button";
       toggleBtn.className = "toggle-btn";
-      toggleBtn.setAttribute("aria-label", t("expand"));
+      toggleBtn.dataset.id = model.id;
+      toggleBtn.setAttribute("aria-label", getToggleAriaLabel(model, false));
       toggleBtn.setAttribute("aria-expanded", "false");
       toggleBtn.setAttribute("aria-controls", groupId);
-      toggleBtn.appendChild(ICONS.chevron());
-      toggleBtn.addEventListener("click", () => {
-        if (filterActive) {
-          // 搜索期间仅切换视觉显示，保留 model.expanded 供过滤结束后精确还原
-          setVisualExpanded(model, model.childrenEl.hidden);
-        } else {
-          setExpanded(model, !model.expanded);
-        }
-      });
+      toggleBtn.appendChild(getIcon("chevron"));
       header.appendChild(toggleBtn);
       model.toggleBtn = toggleBtn;
-      header.setAttribute("aria-expanded", "false");
-      // group 不是 treeitem 的 DOM 后代，用 aria-owns 显式建立所有权
-      header.setAttribute("aria-owns", groupId);
+      model.itemEl.setAttribute("aria-expanded", "false");
 
       const childrenEl = document.createElement("div");
       childrenEl.className = "children-container";
@@ -179,11 +187,11 @@ function createBookmarkTree(nodes, { t, onSelectionChange }) {
     const icon = document.createElement("span");
     icon.className = isFolder ? "folder-icon" : "link-icon";
     icon.setAttribute("aria-hidden", "true");
-    icon.appendChild(isFolder ? ICONS.folder() : ICONS.link());
+    icon.appendChild(getIcon(isFolder ? "folder" : "link"));
 
-    const titleEl = document.createElement("span");
+    const titleEl = model.titleEl;
     titleEl.className = "node-title";
-    titleEl.textContent = model.title;
+    titleEl.textContent = getDisplayTitle(model);
     if (model.url) titleEl.title = model.url;
 
     label.append(model.checkbox, icon, titleEl);
@@ -193,13 +201,6 @@ function createBookmarkTree(nodes, { t, onSelectionChange }) {
     if (isFolder) {
       model.itemEl.appendChild(model.childrenEl);
     }
-
-    // 勾选变化：向下级联，向上重算
-    model.checkbox.addEventListener("change", () => {
-      setSubtreeChecked(model, model.checkbox.checked);
-      refreshAncestors(model.parent);
-      onSelectionChange();
-    });
 
     // 递归构建子节点（跳过分隔符）
     if (isFolder) {
@@ -216,6 +217,7 @@ function createBookmarkTree(nodes, { t, onSelectionChange }) {
     return model;
   }
 
+  /** @type {TreeNodeModel[]} */
   const rootModels = [];
   const fragment = document.createDocumentFragment();
   for (const node of nodes) {
@@ -232,9 +234,9 @@ function createBookmarkTree(nodes, { t, onSelectionChange }) {
   function setVisualExpanded(model, expanded) {
     model.childrenEl.hidden = !expanded;
     model.toggleBtn.setAttribute("aria-expanded", String(expanded));
-    model.toggleBtn.setAttribute("aria-label", expanded ? t("collapse") : t("expand"));
+    model.toggleBtn.setAttribute("aria-label", getToggleAriaLabel(model, expanded));
     model.toggleBtn.classList.toggle("expanded", expanded);
-    model.headerEl.setAttribute("aria-expanded", String(expanded));
+    model.itemEl.setAttribute("aria-expanded", String(expanded));
   }
 
   /**
@@ -245,6 +247,101 @@ function createBookmarkTree(nodes, { t, onSelectionChange }) {
     model.expanded = expanded;
     setVisualExpanded(model, expanded);
   }
+
+  /**
+   * 切换文件夹展开状态（搜索期间仅切换视觉状态）。
+   */
+  function toggleFolder(model) {
+    if (!model.isFolder || !model.childrenEl) return;
+    if (filterActive) {
+      setVisualExpanded(model, model.childrenEl.hidden);
+    } else {
+      setExpanded(model, !model.expanded);
+    }
+  }
+
+  /**
+   * 收集当前视觉上可见的节点（用于键盘方向键导航）。
+   */
+  function getVisibleNodes() {
+    const visible = [];
+    const walk = (list) => {
+      for (const model of list) {
+        if (model.itemEl.hidden) continue;
+        visible.push(model);
+        if (model.isFolder && model.childrenEl && !model.childrenEl.hidden) {
+          walk(model.children);
+        }
+      }
+    };
+    walk(rootModels);
+    return visible;
+  }
+
+  // ---- 统一事件委托 ----
+  rootEl.addEventListener("click", (event) => {
+    const target = event.target;
+    if (!(target instanceof globalThis.Element)) return;
+    const btn = target.closest(".toggle-btn");
+    if (!btn) return;
+    const model = nodeMap.get(btn.dataset.id);
+    if (model) toggleFolder(model);
+  });
+
+  rootEl.addEventListener("change", (event) => {
+    const target = event.target;
+    if (!(target instanceof globalThis.Element) || !target.classList.contains("node-checkbox")) {
+      return;
+    }
+    const model = nodeMap.get(target.dataset.id);
+    if (!model) return;
+    setSubtreeChecked(model, model.checkbox.checked);
+    refreshAncestors(model.parent);
+    onSelectionChange();
+  });
+
+  rootEl.addEventListener("keydown", (event) => {
+    const target = event.target;
+    if (!(target instanceof globalThis.Element)) return;
+    const id =
+      target.dataset?.id ||
+      target.closest(".node-header")?.querySelector(".node-checkbox")?.dataset?.id;
+    const current = id ? nodeMap.get(id) : null;
+    if (!current) return;
+
+    const visible = getVisibleNodes();
+    const index = visible.indexOf(current);
+    if (index === -1) return;
+
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      visible[Math.min(index + 1, visible.length - 1)]?.checkbox.focus();
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      visible[Math.max(index - 1, 0)]?.checkbox.focus();
+    } else if (event.key === "Home") {
+      event.preventDefault();
+      visible[0]?.checkbox.focus();
+    } else if (event.key === "End") {
+      event.preventDefault();
+      visible[visible.length - 1]?.checkbox.focus();
+    } else if (event.key === "ArrowRight" && current.isFolder) {
+      event.preventDefault();
+      if (current.childrenEl.hidden) {
+        toggleFolder(current);
+      } else if (current.children.length > 0) {
+        const firstVisibleChild = current.children.find((c) => !c.itemEl.hidden);
+        firstVisibleChild?.checkbox.focus();
+      }
+    } else if (event.key === "ArrowLeft") {
+      event.preventDefault();
+      if (current.isFolder && !current.childrenEl.hidden) {
+        toggleFolder(current);
+      } else if (current.parent) {
+        current.parent.checkbox.focus();
+      }
+    }
+  });
 
   /**
    * 级联设置子树勾选状态。
@@ -296,6 +393,14 @@ function createBookmarkTree(nodes, { t, onSelectionChange }) {
     element: rootEl,
 
     /**
+     * 当前是否处于搜索过滤态。
+     * @returns {boolean}
+     */
+    isFiltered() {
+      return filterActive;
+    },
+
+    /**
      * 收集当前勾选状态。
      * @returns {{selectedIds:Set<string>, indeterminateIds:Set<string>}}
      */
@@ -326,10 +431,26 @@ function createBookmarkTree(nodes, { t, onSelectionChange }) {
 
     /**
      * 全选 / 全不选。
+     * 搜索过滤激活时，仅作用于当前匹配的节点并重算祖先三态，避免静默修改隐藏书签。
      */
     setAllChecked(checked) {
-      for (const model of rootModels) {
-        setSubtreeChecked(model, checked);
+      if (filterActive) {
+        for (const model of lastMatchSet) {
+          if (model.isFolder) {
+            setSubtreeChecked(model, checked);
+          } else {
+            model.checkbox.checked = checked;
+            model.checkbox.indeterminate = false;
+          }
+        }
+        for (let i = allNodes.length - 1; i >= 0; i--) {
+          const model = allNodes[i];
+          if (model.isFolder) recomputeFromChildren(model);
+        }
+      } else {
+        for (const model of rootModels) {
+          setSubtreeChecked(model, checked);
+        }
       }
       onSelectionChange();
     },
@@ -372,13 +493,16 @@ function createBookmarkTree(nodes, { t, onSelectionChange }) {
     },
 
     /**
-     * 语言切换后刷新动态生成的 aria 文案。
+     * 语言切换后刷新动态生成的 aria 文案与空标题占位文本。
      */
     refreshLanguage() {
       for (const model of allNodes) {
+        if (!model.title && !model.url) {
+          model.titleEl.textContent = getDisplayTitle(model);
+        }
         if (!model.toggleBtn) continue;
         const expanded = model.toggleBtn.getAttribute("aria-expanded") === "true";
-        model.toggleBtn.setAttribute("aria-label", expanded ? t("collapse") : t("expand"));
+        model.toggleBtn.setAttribute("aria-label", getToggleAriaLabel(model, expanded));
       }
     },
 
@@ -393,6 +517,7 @@ function createBookmarkTree(nodes, { t, onSelectionChange }) {
 
       // 清空查询：全部显示并还原真实展开状态
       if (!q) {
+        lastMatchSet = new Set();
         for (const model of allNodes) {
           model.itemEl.hidden = false;
           if (model.isFolder) setExpanded(model, model.expanded);
@@ -406,6 +531,8 @@ function createBookmarkTree(nodes, { t, onSelectionChange }) {
       for (const model of allNodes) {
         if (model.searchText.includes(q)) matchSet.add(model);
       }
+      lastMatchSet = matchSet;
+
       const visibleSet = new Set();
       for (let i = allNodes.length - 1; i >= 0; i--) {
         const model = allNodes[i];

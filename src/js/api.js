@@ -9,19 +9,22 @@
  * @returns {Promise<Array>} 书签树根节点数组
  */
 function getBookmarkTree() {
-  if (typeof browser !== "undefined") {
+  if (typeof browser !== "undefined" && typeof browser?.bookmarks?.getTree === "function") {
     return browser.bookmarks.getTree();
   }
-  return new Promise((resolve, reject) => {
-    chrome.bookmarks.getTree((tree) => {
-      const err = chrome.runtime.lastError;
-      if (err) {
-        reject(new Error(err.message));
-      } else {
-        resolve(tree);
-      }
+  if (typeof chrome !== "undefined" && typeof chrome?.bookmarks?.getTree === "function") {
+    return new Promise((resolve, reject) => {
+      chrome.bookmarks.getTree((tree) => {
+        const err = chrome.runtime?.lastError;
+        if (err) {
+          reject(new Error(err.message));
+        } else {
+          resolve(tree);
+        }
+      });
     });
-  });
+  }
+  return Promise.reject(new Error("Bookmarks API is unavailable in this environment."));
 }
 
 export { getBookmarkTree };

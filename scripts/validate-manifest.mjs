@@ -1,6 +1,6 @@
 /**
  * manifest 校验：双浏览器 manifest 与 package.json 的版本一致性、
- * 必需字段、引用资源存在性。
+ * 必需字段、引用资源（icons / action.default_icon / action.default_popup）存在性。
  *
  * 发布守卫链的一部分：CI 的 release 任务要求 tag v* 与此处版本完全一致。
  */
@@ -47,13 +47,24 @@ for (const [name, manifest] of [
     manifest.action?.default_popup === "popup.html",
     `${name}: action.default_popup 必须为 popup.html`
   );
+  if (manifest.action?.default_popup) {
+    check(
+      existsSync(join(ROOT, "src", manifest.action.default_popup)),
+      `${name}: 弹窗入口缺失 src/${manifest.action.default_popup}`
+    );
+  }
   check(
     Array.isArray(manifest.permissions) && manifest.permissions.includes("bookmarks"),
     `${name}: permissions 必须包含 bookmarks`
   );
 
-  // 引用的图标必须存在于 src/icons
-  for (const iconPath of Object.values(manifest.icons ?? {})) {
+  // 引用的图标（顶层 icons 与 action.default_icon）必须全部存在于 src/
+  const iconEntries = [
+    ...Object.values(manifest.icons ?? {}),
+    ...Object.values(manifest.action?.default_icon ?? {}),
+  ];
+  check(iconEntries.length > 0, `${name}: 缺少图标配置`);
+  for (const iconPath of new Set(iconEntries)) {
     check(existsSync(join(ROOT, "src", iconPath)), `${name}: 图标缺失 src/${iconPath}`);
   }
 
@@ -70,7 +81,16 @@ for (const [name, manifest] of [
 }
 
 // ---- 浏览器专属 ----
+check(
+  typeof chrome.minimum_chrome_version === "string" && /^\d+$/.test(chrome.minimum_chrome_version),
+  "chrome: 缺少合法的 minimum_chrome_version"
+);
 check(typeof firefox.browser_specific_settings?.gecko?.id === "string", "firefox: 缺少 gecko id");
+check(
+  typeof firefox.browser_specific_settings?.gecko?.strict_min_version === "string" &&
+    /^\d+\.\d+$/.test(firefox.browser_specific_settings.gecko.strict_min_version),
+  "firefox: 缺少合法的 gecko.strict_min_version"
+);
 check(!("browser_specific_settings" in chrome), "chrome: 不应包含 browser_specific_settings");
 
 // 完整字体源文件必须存在（构建期子集化生成 dist/fonts/ui-subset.woff2）

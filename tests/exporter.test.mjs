@@ -16,7 +16,9 @@ import { describe, it } from "node:test";
 import { fileURLToPath } from "node:url";
 
 import {
+  buildIconList,
   buildStructureFile,
+  extractHostname,
   filterTreeBySelection,
   generateStructure,
   makeBookmarkFilename,
@@ -105,6 +107,15 @@ describe("filterTreeBySelection", () => {
     assert.equal(data[0].children[0].children[0].url, "https://bangumi.tv/");
   });
 
+  it("未提供 indeterminateIds 时单趟后序递归仍能正确保留含选中后代的祖先文件夹", () => {
+    const tree = makeTree();
+    const data = filterTreeBySelection(tree, new Set(["100"]), new Set(), NOW);
+    assert.equal(data.length, 1);
+    assert.equal(data[0].title, "书签栏");
+    assert.equal(data[0].children[0].title, "ACG");
+    assert.equal(data[0].children[0].children[0].url, "https://bangumi.tv/");
+  });
+
   it("未选中的根文件夹整体剔除", () => {
     const tree = makeTree();
     const selected = new Set(["20"]);
@@ -143,6 +154,31 @@ describe("filterTreeBySelection", () => {
     ];
     const data = filterTreeBySelection(tree, new Set(["1", "10"]), new Set(), NOW);
     assert.deepEqual(data[0].children[0].icon, []);
+  });
+
+  it("非 HTTP(S) 协议与本地/私网地址不生成第三方 Favicon URL", () => {
+    const blockedUrls = [
+      "chrome://extensions",
+      "edge://settings",
+      "chrome-extension://abcdefghijklmnop/popup.html",
+      "ftp://files.example.com/pub",
+      "http://localhost:3000/app",
+      "http://sub.localhost/test",
+      "http://printer.local/",
+      "http://127.0.0.1:8080/",
+      "http://192.168.1.1/admin",
+      "http://10.0.0.1/",
+      "http://172.16.0.5/",
+      "http://[::1]:8080/",
+      "file:///Users/alice/doc.pdf",
+      "about:blank",
+    ];
+    for (const url of blockedUrls) {
+      assert.equal(extractHostname(url), "", `应过滤 URL: ${url}`);
+      assert.deepEqual(buildIconList(url), [], `icon 应为空: ${url}`);
+    }
+    assert.equal(extractHostname("https://GitHub.com/ChuwuYo"), "github.com");
+    assert.equal(buildIconList("https://github.com/ChuwuYo").length, 4);
   });
 
   it("选中的空文件夹以 children:[] 保留", () => {
@@ -265,12 +301,6 @@ describe("normalizeAddDate", () => {
   });
 });
 
-/**
- * 黄金快照回测（CI 必跑）：vendor 进仓库的合成夹具，
- * 锁定「含链接的全部兄弟节点索引」的 id 路径算法与 structure 形状。
- * 夹具为全合成数据（example.com），但保留关键鉴别结构：
- * 文件夹前面存在链接兄弟，使「全兄弟索引」与「仅文件夹索引」产生不同输出。
- */
 describe("黄金快照回测", () => {
   const fixture = JSON.parse(
     readFileSync(join(dirname(fileURLToPath(import.meta.url)), "fixtures/golden.json"), "utf8")
@@ -282,7 +312,6 @@ describe("黄金快照回测", () => {
     assert.equal(result[0].id, "0");
     assert.deepEqual(result[0].children, fixture.structureChildren);
 
-    // 根条目计数与快照数据自洽
     const children = fixture.bookmarks[0].children;
     assert.equal(result[0].linkCount, children.filter((c) => c.type === "link").length);
     assert.equal(result[0].folderCount, children.filter((c) => c.type === "folder").length);
@@ -290,9 +319,6 @@ describe("黄金快照回测", () => {
   });
 
   it("链接兄弟使文件夹索引偏移（鉴别两种索引算法）", () => {
-    // 夹具：「偏移演示父夹」的 6 个子项中，文件夹「被偏移的文件夹」
-    // 前面有 3 个链接，其全兄弟索引 id 为 0_3；末尾夹为 0_5。
-    // 若算法退化为仅文件夹索引，二者将变为 0_0 / 0_1——此用例专杀该回归。
     const result = generateStructure(fixture.shiftedCase.bookmarks);
     assert.deepEqual(result, fixture.shiftedCase.structure);
 
@@ -301,10 +327,6 @@ describe("黄金快照回测", () => {
   });
 });
 
-/**
- * 与配套项目真实数据的交叉契约校验（仓库存在时执行）。
- * 验证真实 bookmarks.json / structure.json 的形状与我们的导出契约一致。
- */
 describe("配套项目真实数据契约（可选）", () => {
   const siblingRoot = join(fileURLToPath(import.meta.url), "..", "..", "..", "ChuwuBookmarks");
   const bookmarksPath = join(siblingRoot, "bookmarks.json");
