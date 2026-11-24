@@ -1,6 +1,6 @@
 /**
  * 书签树组件交互冒烟测试（jsdom）。
- * 覆盖三态级联、勾选收集、选择恢复、搜索过滤与展开状态还原。
+ * 覆盖三态级联、勾选收集、选择恢复、搜索过滤、事件委托（含键盘导航）、空标题回退、缩进上限与搜索态全选。
  */
 
 import assert from "node:assert/strict";
@@ -9,12 +9,16 @@ import { JSDOM } from "jsdom";
 
 const dom = new JSDOM("<!doctype html><html><body></body></html>");
 globalThis.document = dom.window.document;
+globalThis.Element = dom.window.Element;
 
 const { createBookmarkTree } = await import("../src/js/tree.js");
 
 const zh = {
   expand: "展开",
   collapse: "收起",
+  expandFolder: (name) => `展开 ${name}`,
+  collapseFolder: (name) => `收起 ${name}`,
+  untitled: "(无标题)",
 };
 const t = (key) => zh[key] ?? key;
 
@@ -58,16 +62,26 @@ function checkboxOf(tree, id) {
 }
 
 function change(checkbox) {
-  checkbox.dispatchEvent(new dom.window.Event("change", { bubbles: false }));
+  checkbox.dispatchEvent(new dom.window.Event("change", { bubbles: true }));
+}
+
+function pressKey(target, key) {
+  target.dispatchEvent(new dom.window.KeyboardEvent("keydown", { key, bubbles: true }));
 }
 
 describe("createBookmarkTree", () => {
-  it("渲染全部节点并正确标记类型", () => {
+  it("渲染全部节点并正确标记类型与无障碍层级", () => {
     const { tree } = makeTree();
     const boxes = tree.element.querySelectorAll(".node-checkbox");
     assert.equal(boxes.length, 7);
     assert.equal(tree.element.querySelectorAll('[data-type="folder"]').length, 3);
     assert.equal(tree.element.querySelectorAll('[data-type="link"]').length, 4);
+
+    // 文件夹展开按钮包含文件夹名称
+    const acgNode = checkboxOf(tree, "10").closest(".bookmark-node");
+    const toggle = acgNode.querySelector(".toggle-btn");
+    assert.equal(toggle.getAttribute("aria-label"), "展开 ACG");
+    assert.equal(acgNode.getAttribute("role"), "treeitem");
   });
 
   it("勾选父级级联所有后代", () => {
@@ -77,7 +91,6 @@ describe("createBookmarkTree", () => {
     change(parent);
     assert.equal(checkboxOf(tree, "100").checked, true);
     assert.equal(checkboxOf(tree, "101").checked, true);
-    // 兄弟链接不受影响
     assert.equal(checkboxOf(tree, "11").checked, false);
   });
 
@@ -107,7 +120,7 @@ describe("createBookmarkTree", () => {
     assert.equal(checkboxOf(tree, "1").indeterminate, true);
   });
 
-  it("setAllChecked 全选/全不选", () => {
+  it("setAllChecked 非搜索态全选/全不选，搜索态仅作用于匹配项且不级联隐藏后代", () => {
     const { tree } = makeTree();
     tree.setAllChecked(true);
     assert.equal(tree.getCheckedCounts().folders, 3);
@@ -117,6 +130,16 @@ describe("createBookmarkTree", () => {
     tree.setAllChecked(false);
     assert.equal(tree.getCheckedCounts().folders, 0);
     assert.equal(tree.getUncheckedIds().length, 7);
+
+    // 搜索仅命中文件夹 ACG (10)，全选仅勾选 10 本身而不级联隐藏子项 100/101
+    tree.filter("ACG");
+    assert.equal(tree.isFiltered(), true);
+    tree.setAllChecked(true);
+    assert.equal(checkboxOf(tree, "10").checked, true);
+    assert.equal(checkboxOf(tree, "100").checked, false);
+    assert.equal(checkboxOf(tree, "101").checked, false);
+    assert.equal(checkboxOf(tree, "20").checked, false);
+    assert.equal(checkboxOf(tree, "1").indeterminate, true);
   });
 
   it("applyUncheckedIds 恢复三态：全选后取消指定项", () => {
@@ -126,7 +149,6 @@ describe("createBookmarkTree", () => {
     assert.equal(checkboxOf(tree, "101").checked, true);
     assert.equal(checkboxOf(tree, "10").indeterminate, true);
     assert.equal(checkboxOf(tree, "1").indeterminate, true);
-    // 「20」是唯一子级，取消后「2」应为未勾选非半选
     assert.equal(checkboxOf(tree, "2").checked, false);
     assert.equal(checkboxOf(tree, "2").indeterminate, false);
   });
@@ -136,7 +158,6 @@ describe("createBookmarkTree", () => {
     data[1].children.push({ id: "21", title: "新书签", url: "https://new.example.com/" });
     const tree = createBookmarkTree(data, { t, onSelectionChange: () => {} });
 
-    // 「2」在上次保存时被整体取消；新增的「21」不在快照中，也应保持未勾选。
     tree.applyUncheckedIds(["2", "20"]);
     assert.equal(checkboxOf(tree, "2").checked, false);
     assert.equal(checkboxOf(tree, "2").indeterminate, false);
@@ -153,7 +174,6 @@ describe("createBookmarkTree", () => {
     });
     const tree = createBookmarkTree(data, { t, onSelectionChange: () => {} });
 
-    // 「10」上次为半选，不在 uncheckedIds 中；新增的「102」应默认勾选。
     tree.applyUncheckedIds(["100", "20"]);
     assert.equal(checkboxOf(tree, "102").checked, true);
     assert.equal(checkboxOf(tree, "10").indeterminate, true);
@@ -167,27 +187,67 @@ describe("createBookmarkTree", () => {
       .closest(".bookmark-node");
     const acgChildren = acg.querySelector(".children-container");
 
-    // 过滤前收起
     assert.equal(acgChildren.hidden, true);
 
     const matches = tree.filter("bangumi");
     assert.equal(matches, 1);
-    // 匹配节点的祖先可见且被视觉展开
     assert.equal(acg.hidden, false);
     assert.equal(acgChildren.hidden, false);
-    // 不相关的「其他书签」子树中未匹配的链接被隐藏
     const test20 = checkboxOf(tree, "20").closest(".bookmark-node");
     assert.equal(test20.hidden, true);
 
-    // 搜索期间点击展开按钮只改视觉，不污染记忆状态
     const toggle = acg.querySelector(".toggle-btn");
-    toggle.dispatchEvent(new dom.window.Event("click", { bubbles: false }));
-    assert.equal(acgChildren.hidden, true); // 视觉上收起了
+    toggle.dispatchEvent(new dom.window.Event("click", { bubbles: true }));
+    assert.equal(acgChildren.hidden, true);
 
-    // 清空搜索：还原到过滤前的真实状态（收起）
     tree.filter("");
     assert.equal(acgChildren.hidden, true);
     assert.equal(test20.hidden, false);
+  });
+
+  it("键盘方向键导航：跳过折叠子节点，支持 ArrowRight 展开与 ArrowLeft 收起/回退", () => {
+    const { tree } = makeTree();
+    dom.window.document.body.replaceChildren(tree.element);
+
+    const cb1 = checkboxOf(tree, "1");
+    const cb2 = checkboxOf(tree, "2");
+    const cb10 = checkboxOf(tree, "10");
+
+    // 初始全部折叠：在 1 上按 ArrowDown 应跳过折叠的子节点直接聚焦到 2
+    cb1.focus();
+    pressKey(cb1, "ArrowDown");
+    assert.equal(dom.window.document.activeElement, cb2);
+
+    // 按 ArrowUp 回到 1，再按 ArrowRight 展开 1，再按 ArrowRight 聚焦第一个子节点 10
+    pressKey(cb2, "ArrowUp");
+    assert.equal(dom.window.document.activeElement, cb1);
+    pressKey(cb1, "ArrowRight");
+    assert.equal(cb1.closest(".bookmark-node").getAttribute("aria-expanded"), "true");
+    pressKey(cb1, "ArrowRight");
+    assert.equal(dom.window.document.activeElement, cb10);
+
+    // 在折叠的子文件夹 10 上按 ArrowLeft 应回到父节点 1
+    pressKey(cb10, "ArrowLeft");
+    assert.equal(dom.window.document.activeElement, cb1);
+  });
+
+  it("空标题书签回退显示 URL 或无标题占位，且深层缩进有上限封顶", () => {
+    let deep = { id: "leaf", title: "", url: "https://noname.example.com/" };
+    for (let d = 12; d >= 1; d--) {
+      deep = { id: `f${d}`, title: d === 12 ? "" : `F${d}`, children: [deep] };
+    }
+    const tree = createBookmarkTree([deep], { t, onSelectionChange: () => {} });
+
+    const leafHeader = checkboxOf(tree, "leaf").closest(".node-header");
+    assert.equal(
+      leafHeader.querySelector(".node-title").textContent,
+      "https://noname.example.com/"
+    );
+    // MAX_INDENT_DEPTH = 8 => 8 * 16 + 8 = 136px
+    assert.equal(leafHeader.style.paddingInlineStart, "136px");
+
+    const emptyFolderHeader = checkboxOf(tree, "f12").closest(".node-header");
+    assert.equal(emptyFolderHeader.querySelector(".node-title").textContent, "(无标题)");
   });
 
   it("Firefox 分隔符节点不渲染、不计数", () => {
@@ -197,13 +257,13 @@ describe("createBookmarkTree", () => {
         title: "书签栏",
         children: [
           { id: "10", title: "A", url: "https://a.com/" },
-          { id: "sep1", type: "separator" }, // 无 url 无 children
+          { id: "sep1", type: "separator" },
           { id: "11", title: "B", url: "https://b.com/" },
         ],
       },
     ];
     const tree = createBookmarkTree(data, { t, onSelectionChange: () => {} });
-    assert.equal(tree.element.querySelectorAll(".node-checkbox").length, 3); // 1 文件夹 + 2 链接
+    assert.equal(tree.element.querySelectorAll(".node-checkbox").length, 3);
     tree.setAllChecked(true);
     assert.equal(tree.getCheckedCounts().links, 2);
   });

@@ -3,13 +3,16 @@
  * 默认跟随浏览器语言，用户可手动切换，选择持久化到 localStorage。
  */
 
-const LANG_STORAGE_KEY = "bookmarksPortalLang";
+import { STORAGE_KEYS, readStorage, writeStorage } from "./storage.js";
 
 const translations = {
   zh: {
+    pageTitle: "书签传送门-BookmarksPortal",
     title: "选择要导出的书签",
     selectAll: "全选",
     deselectAll: "全不选",
+    selectAllMatched: "全选匹配",
+    deselectAllMatched: "取消匹配",
     exportButton: "导出书签",
     exporting: "导出中…",
     searchPlaceholder: "搜索书签…",
@@ -29,15 +32,21 @@ const translations = {
     loadFailed: "书签加载失败，请查看控制台了解详情。",
     expand: "展开",
     collapse: "收起",
+    expandFolder: (name) => `展开 ${name}`,
+    collapseFolder: (name) => `收起 ${name}`,
+    untitled: "(无标题)",
     themeSystem: "主题：跟随系统",
     themeLight: "主题：亮色",
     themeDark: "主题：暗色",
     selectedCount: (folders, links) => `已选 ${folders} 个文件夹、${links} 个链接`,
   },
   en: {
+    pageTitle: "BookmarksPortal",
     title: "Select Bookmarks",
     selectAll: "Select All",
     deselectAll: "Deselect All",
+    selectAllMatched: "Select Matches",
+    deselectAllMatched: "Deselect Matches",
     exportButton: "Transmit !!",
     exporting: "Exporting…",
     searchPlaceholder: "Search bookmarks…",
@@ -58,10 +67,14 @@ const translations = {
     loadFailed: "Failed to load bookmarks. Check the console for details.",
     expand: "Expand",
     collapse: "Collapse",
+    expandFolder: (name) => `Expand ${name}`,
+    collapseFolder: (name) => `Collapse ${name}`,
+    untitled: "(Untitled)",
     themeSystem: "Theme: System",
     themeLight: "Theme: Light",
     themeDark: "Theme: Dark",
-    selectedCount: (folders, links) => `${folders} folders, ${links} links selected`,
+    selectedCount: (folders, links) =>
+      `${folders} ${folders === 1 ? "folder" : "folders"}, ${links} ${links === 1 ? "link" : "links"} selected`,
   },
 };
 
@@ -72,12 +85,8 @@ const SUPPORTED_LANGS = Object.keys(translations);
  * @returns {"zh"|"en"}
  */
 function detectLanguage() {
-  try {
-    const saved = localStorage.getItem(LANG_STORAGE_KEY);
-    if (SUPPORTED_LANGS.includes(saved)) return saved;
-  } catch {
-    // localStorage 不可用（含 Node 测试环境）时静默回退
-  }
+  const saved = readStorage(STORAGE_KEYS.LANG);
+  if (SUPPORTED_LANGS.includes(saved)) return saved;
   if (typeof navigator !== "undefined" && navigator.language?.startsWith("zh")) return "zh";
   return "en";
 }
@@ -99,11 +108,7 @@ function t(key) {
  */
 function toggleLanguage() {
   currentLang = currentLang === "zh" ? "en" : "zh";
-  try {
-    localStorage.setItem(LANG_STORAGE_KEY, currentLang);
-  } catch {
-    // 持久化失败不影响本次切换
-  }
+  writeStorage(STORAGE_KEYS.LANG, currentLang);
   return currentLang;
 }
 
@@ -117,17 +122,22 @@ function toggleLanguage() {
  */
 function applyStaticTexts(doc) {
   doc.documentElement.lang = currentLang === "zh" ? "zh-CN" : "en";
+  doc.title = String(t("pageTitle"));
   doc.querySelectorAll("[data-i18n]").forEach((el) => {
-    el.textContent = t(el.dataset.i18n);
+    const val = t(el.dataset.i18n);
+    if (typeof val === "string") el.textContent = val;
   });
   doc.querySelectorAll("[data-i18n-aria]").forEach((el) => {
-    el.setAttribute("aria-label", t(el.dataset.i18nAria));
+    const val = t(el.dataset.i18nAria);
+    if (typeof val === "string") el.setAttribute("aria-label", val);
   });
   doc.querySelectorAll("[data-i18n-title]").forEach((el) => {
-    el.setAttribute("title", t(el.dataset.i18nTitle));
+    const val = t(el.dataset.i18nTitle);
+    if (typeof val === "string") el.setAttribute("title", val);
   });
   doc.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
-    el.setAttribute("placeholder", t(el.dataset.i18nPlaceholder));
+    const val = t(el.dataset.i18nPlaceholder);
+    if (typeof val === "string") el.setAttribute("placeholder", val);
   });
 }
 

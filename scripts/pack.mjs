@@ -9,7 +9,6 @@
  *   SHA256SUMS.txt
  */
 
-import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import {
   createWriteStream,
@@ -19,12 +18,10 @@ import {
   rmSync,
   writeFileSync,
 } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join } from "node:path";
 import { ZipFile } from "yazl";
+import { DIST_DIR, TARGETS, buildTargets } from "../build.mjs";
 
-const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const DIST_DIR = join(ROOT, "dist");
 const ARTIFACTS_DIR = join(DIST_DIR, "artifacts");
 
 /**
@@ -65,15 +62,15 @@ function zipDirectory(srcDir, outPath) {
   });
 }
 
-// 1. 构建
-execFileSync(process.execPath, [join(ROOT, "build.mjs")], { stdio: "inherit" });
+// 1. 构建（直接复用 build.mjs 模块，避免子进程与目标列表重复定义）
+await buildTargets(TARGETS);
 
 // 2. 打包
 rmSync(ARTIFACTS_DIR, { recursive: true, force: true });
 mkdirSync(ARTIFACTS_DIR, { recursive: true });
 
 const sums = [];
-for (const target of ["chrome", "firefox"]) {
+for (const target of TARGETS) {
   const filename = `BookmarksPortal-${target}.zip`;
   const zipPath = join(ARTIFACTS_DIR, filename);
   await zipDirectory(join(DIST_DIR, target), zipPath);
